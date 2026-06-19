@@ -1,0 +1,126 @@
+.top-banner {
+  background: linear-gradient(90deg, #1a1a1a, #303030);
+  color: #fff;
+  text-align: center;
+  font-size: 13px;
+  padding: 8px 16px;
+  letter-spacing: .3px;
+  span { color: $brand-primary; font-weight: 700; }
+}
+
+.site-header {
+  background: #fff;
+  border-bottom: 1px solid $brand-border;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
+  .header-inner {
+    @include container;
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    padding: 14px $sp;
+  }
+
+  .logo {
+    font-family: 'Georgia', serif;
+    font-weight: 800;
+    font-size: 26px;
+    color: $brand-primary;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: $brand-bg-pink;
+      display: flex; align-items: center; justify-content: center;
+      color: $brand-primary;
+      font-size: 22px;
+    }
+  }
+
+  .main-nav {
+    flex: 1;
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      gap: $sp-lg;
+      justify-content: center;
+    }
+    a {
+      color: $brand-secondary;
+      font-weight: 600;
+      text-transform: capitalize;
+      padding: 8px 0;
+      position: relative;
+      &:hover { color: $brand-primary; }
+      &.active::after {
+        content: '';
+        position: absolute;
+        left: 0; right: 0; bottom: -4px;
+        height: 2px;
+        background: $brand-primary;
+      }
+    }
+  }
+
+  .header-search {
+    flex: 0 1 320px;
+    position: relative;
+    input {
+      padding-right: 40px;
+      background: $brand-bg-alt;
+      border-color: transparent;
+    }
+    button {
+      position: absolute;
+      right: 4px; top: 4px; bottom: 4px;
+      width: 36px;
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+      color: $brand-text-light;
+      font-size: 18px;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    gap: $sp-md;
+    align-items: center;
+    a, button.icon-btn {
+      color: $brand-secondary;
+      position: relative;
+      font-size: 20px;
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+      &:hover { color: $brand-primary; }
+    }
+    .cart-count {
+      position: absolute;
+      top: -8px; right: -10px;
+      background: $brand-primary;
+      color: #fff;
+      font-size: 11px;
+      min-width: 18px;
+      height: 18px;
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 5px;
+      font-weight: 700;
+    }
+  }
+
+  @include breakpoint($bp-md) {
+    .header-inner { flex-wrap: wrap; }
+    .main-nav ul { gap: $sp; flex-wrap: wrap; justify-content: flex-start; }
+    .header-search { flex: 1 1 100%; order: 5; }
+  }
+}

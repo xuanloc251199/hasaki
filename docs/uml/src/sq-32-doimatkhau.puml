@@ -1,0 +1,36 @@
+@startuml sq-32-doimatkhau
+title Biểu đồ tuần tự - Đổi mật khẩu
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #FF5E8E
+  ParticipantBorderColor #FF5E8E
+  ParticipantBackgroundColor #FFF0F3
+}
+actor "Khách hàng" as U
+participant "AccountView" as V
+participant "AuthBLL" as B
+participant "AccountDAL" as D
+database "CSDL" as DB
+U -> V : Nhập mật khẩu cũ, mật khẩu mới
+activate V
+V -> B : changePassword(id, old, new)
+activate B
+B -> D : getById(id)
+D -> DB : SELECT MatKhau
+DB --> D : hash
+D --> B : hash
+B -> B : password_verify(old, hash)
+alt Mật khẩu cũ đúng
+  B -> B : password_hash(new)
+  B -> D : update(id, hash)
+  D -> DB : UPDATE TaiKhoan SET MatKhau=?
+  B --> V : thành công
+  V --> U : "Đổi mật khẩu thành công"
+else Sai mật khẩu cũ
+  B --> V : lỗi
+  V --> U : "Mật khẩu hiện tại không đúng"
+end
+deactivate B
+deactivate V
+@enduml

@@ -1,0 +1,29 @@
+@startuml sq-34-sua-giohang
+title Biểu đồ tuần tự - Sửa sản phẩm trong giỏ hàng
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #FF5E8E
+  ParticipantBorderColor #FF5E8E
+  ParticipantBackgroundColor #FFF0F3
+}
+actor "Khách hàng" as U
+participant "CartView" as V
+participant "CartBLL" as B
+participant "Session" as S
+U -> V : Thay đổi số lượng
+activate V
+V -> B : update(id, qty)
+activate B
+alt Hợp lệ
+  B -> S : Cập nhật số lượng
+  B -> B : getTotal()
+  B --> V : tổng tiền mới
+  V --> U : Cập nhật hiển thị
+else Không hợp lệ
+  B --> V : lỗi
+  V --> U : "Số lượng không hợp lệ"
+end
+deactivate B
+deactivate V
+@enduml

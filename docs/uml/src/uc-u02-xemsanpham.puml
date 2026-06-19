@@ -1,0 +1,23 @@
+@startuml uc-u02-xemsanpham
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #FFF0F3
+  BorderColor #FF5E8E
+  ArrowColor #444444
+}
+title Use case chi tiết - Xem sản phẩm (UC02)
+actor "Khách hàng" as ACT0
+rectangle "Xem sản phẩm" {
+  usecase "Xem danh sách sản phẩm" as U0
+  usecase "Xem chi tiết sản phẩm" as U1
+  usecase "Lọc theo danh mục" as U2
+  usecase "Xem đánh giá" as U3
+}
+ACT0 -- U0
+ACT0 -- U1
+ACT0 -- U2
+ACT0 -- U3
+@enduml

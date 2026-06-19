@@ -1,0 +1,26 @@
+@startuml sq-75-khoa-taikhoan
+title Biểu đồ tuần tự - Khóa tài khoản
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #FF5E8E
+  ParticipantBorderColor #FF5E8E
+  ParticipantBackgroundColor #FFF0F3
+}
+actor "Admin" as U
+participant "AccountView" as V
+participant "AccountBLL" as B
+participant "AccountDAL" as D
+database "CSDL" as DB
+U -> V : Chọn khóa / mở khóa tài khoản
+activate V
+V -> B : lock(id) / unlock(id)
+activate B
+B -> D : setStatus(id, trangThai)
+D -> DB : UPDATE TaiKhoan SET TrangThai=?
+D --> B : ok
+B --> V : thành công
+V --> U : Cập nhật trạng thái tài khoản
+deactivate B
+deactivate V
+@enduml

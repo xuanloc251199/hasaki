@@ -1,0 +1,22 @@
+@startuml sq-78-timkiem-kho
+title Biểu đồ tuần tự - Tìm kiếm sản phẩm trong kho
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #FF5E8E
+  ParticipantBorderColor #FF5E8E
+  ParticipantBackgroundColor #FFF0F3
+}
+actor "Nhân viên" as U
+participant "WarehouseView" as V
+participant "WarehouseDAL" as D
+database "CSDL" as DB
+U -> V : Nhập từ khóa sản phẩm
+activate V
+V -> D : search(keyword)
+D -> DB : SELECT KhoHang WHERE TenSanPham LIKE ?
+DB --> D : kết quả
+D --> V : danh sách tồn kho
+V --> U : Hiển thị kết quả
+deactivate V
+@enduml

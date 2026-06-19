@@ -1,0 +1,28 @@
+@startuml sq-50-manage-khachhang
+title Biểu đồ tuần tự - Quản lý khách hàng
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #FF5E8E
+  ParticipantBorderColor #FF5E8E
+  ParticipantBackgroundColor #FFF0F3
+}
+actor "Nhân viên" as U
+participant "admin/customers.php" as V
+participant "CustomerBLL" as B
+participant "CustomerDAL" as D
+database "CSDL" as DB
+U -> V : Chọn chức năng quản lý khách hàng
+activate V
+V -> B : getAll()
+activate B
+B -> D : getAll()
+D -> DB : SELECT danh sách khách hàng
+DB --> D : dữ liệu
+D --> B : danh sách
+B --> V : danh sách
+deactivate B
+V --> U : Hiển thị danh sách khách hàng
+deactivate V
+
+@enduml

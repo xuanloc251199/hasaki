@@ -1,0 +1,19 @@
+@startuml uc-u05-dangky
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #FFF0F3
+  BorderColor #FF5E8E
+  ArrowColor #444444
+}
+title Use case chi tiết - Đăng ký (UC05)
+actor "Khách hàng" as ACT0
+rectangle "Đăng ký" {
+  usecase "Nhập thông tin đăng ký" as U0
+  usecase "Tạo tài khoản" as U1
+}
+ACT0 -- U0
+ACT0 -- U1
+@enduml

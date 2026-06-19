@@ -1,0 +1,50 @@
+// ===== Brand colors (palette: 880D1E / DD2D4A / F26A8D / F49CBB / CBEEF3) =====
+$brand-primary: #DD2D4A;       // primary red
+$brand-primary-dark: #880D1E;  // dark wine red
+$brand-primary-light: #F26A8D; // rose pink
+$brand-pink-soft: #F49CBB;     // light pink
+$brand-secondary: #1a1a1a;
+$brand-mint: #CBEEF3;          // accent mint
+$brand-mint-dark: #4FAEC2;     // accent mint dark
+$brand-bg: #ffffff;
+$brand-bg-alt: #f7f7f7;
+$brand-bg-pink: #FDF2F4;       // brand-50
+$brand-text: #2d2d2d;
+$brand-text-light: #777;
+$brand-border: #ececec;
+$brand-success: #16a34a;
+$brand-danger:  #DD2D4A;
+$brand-warning: #f59e0b;
+
+// ===== Layout =====
+$container: 1200px;
+$radius: 8px;
+$radius-lg: 14px;
+
+// ===== Spacing =====
+$sp-xs: 4px;
+$sp-sm: 8px;
+$sp:    16px;
+$sp-md: 24px;
+$sp-lg: 32px;
+$sp-xl: 48px;
+
+// ===== Typography =====
+$font-base: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+$fs-sm: 13px;
+$fs-base: 14px;
+$fs-md: 16px;
+$fs-lg: 18px;
+$fs-xl: 22px;
+$fs-2xl: 28px;
+
+// ===== Shadows =====
+$shadow-sm: 0 2px 6px rgba(0,0,0,.06);
+$shadow:    0 4px 14px rgba(0,0,0,.08);
+$shadow-lg: 0 12px 28px rgba(0,0,0,.12);
+
+// ===== Breakpoints =====
+$bp-sm: 576px;
+$bp-md: 768px;
+$bp-lg: 992px;
+$bp-xl: 1200px;

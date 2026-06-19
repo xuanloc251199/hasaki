@@ -1,0 +1,34 @@
+@startuml sq-51-add-khachhang
+title Biểu đồ tuần tự - Thêm khách hàng
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #FF5E8E
+  ParticipantBorderColor #FF5E8E
+  ParticipantBackgroundColor #FFF0F3
+}
+actor "Nhân viên" as U
+participant "admin/customers.php" as V
+participant "CustomerBLL" as B
+participant "CustomerDAL" as D
+database "CSDL" as DB
+U -> V : Nhập thông tin khách hàng mới
+activate V
+V -> B : create(data)
+activate B
+B -> B : Kiểm tra tính đúng đắn dữ liệu
+alt Dữ liệu hợp lệ
+  B -> D : create(data)
+  D -> DB : INSERT khách hàng
+  DB --> D : mã mới
+  D --> B : mã mới
+  B --> V : thành công
+  V --> U : "Thêm khách hàng thành công"
+else Dữ liệu không hợp lệ
+  B --> V : lỗi
+  V --> U : "Yêu cầu nhập đúng thông tin"
+end
+deactivate B
+deactivate V
+
+@enduml

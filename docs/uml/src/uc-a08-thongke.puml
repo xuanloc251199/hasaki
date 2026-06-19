@@ -1,0 +1,28 @@
+@startuml uc-a08-thongke
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #FFF0F3
+  BorderColor #FF5E8E
+  ArrowColor #444444
+}
+title Use case chi tiết - Thống kê (UC08)
+actor "Admin" as ACT0
+rectangle "Thống kê" {
+  usecase "Thống kê theo tháng" as U0
+  usecase "Thống kê theo quý" as U1
+  usecase "Thống kê theo năm" as U2
+  usecase "Thống kê theo mặt hàng" as U3
+  usecase "Đăng nhập" as LOGIN
+}
+ACT0 -- U0
+ACT0 -- U1
+ACT0 -- U2
+ACT0 -- U3
+U0 ..> LOGIN : <<include>>
+U1 ..> LOGIN : <<include>>
+U2 ..> LOGIN : <<include>>
+U3 ..> LOGIN : <<include>>
+@enduml

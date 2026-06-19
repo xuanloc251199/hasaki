@@ -1,0 +1,103 @@
+-- ===================================================================
+-- Incremental migration: add Chatbot tables to existing hasaki_db
+-- Run this once if you already have hasaki_db installed.
+-- IMPORTANT: pipe with --default-character-set=utf8mb4 to avoid
+-- mojibake on Windows (mysql.exe defaults to cp437/cp850 otherwise).
+-- ===================================================================
+SET NAMES utf8mb4;
+USE hasaki_db;
+
+DROP TABLE IF EXISTS ChatbotIntent;
+DROP TABLE IF EXISTS ChatbotConfig;
+
+CREATE TABLE ChatbotIntent (
+    MaIntent       INT AUTO_INCREMENT PRIMARY KEY,
+    TenIntent      VARCHAR(100) NOT NULL,
+    TuKhoa         TEXT NOT NULL,
+    CauTraLoi      TEXT NOT NULL,
+    LoaiGoiY       VARCHAR(20) DEFAULT 'none',
+    GiaTriGoiY     VARCHAR(100) NULL,
+    Link           VARCHAR(255) NULL,
+    ThuTu          INT DEFAULT 0,
+    KichHoat       TINYINT DEFAULT 1,
+    LaQuickReply   TINYINT DEFAULT 0,
+    NgayCapNhat    DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE ChatbotConfig (
+    ConfigKey   VARCHAR(50) PRIMARY KEY,
+    ConfigValue TEXT NULL,
+    GhiChu      VARCHAR(255) NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO ChatbotConfig (ConfigKey, ConfigValue, GhiChu) VALUES
+('greeting',         'Xin chào! Mình là **Hasaki Bot** 💖\nMình có thể giúp bạn:\n• Tư vấn sản phẩm theo loại da\n• Tìm sản phẩm sale / mới / hot\n• Hướng dẫn đặt hàng / đổi trả', 'Lời chào khi mở chatbot'),
+('fallback',         'Mình chưa hiểu rõ ý bạn 😅\nBạn có thể thử hỏi: tư vấn da khô/da dầu, tìm son môi, kem chống nắng, sản phẩm sale, cách đặt hàng, chính sách đổi trả...\n\nHoặc gọi hotline **1900 1234** để được tư vấn trực tiếp nhé 💕', 'Câu trả lời khi không tìm thấy intent phù hợp'),
+('bot_name',         'Hasaki Bot', 'Tên hiển thị của chatbot'),
+('max_products',     '4', 'Số sản phẩm tối đa hiển thị trong 1 reply'),
+('enable_fallback_search', '1', 'Cho phép fallback search products khi không match intent (1/0)');
+
+INSERT INTO ChatbotIntent (TenIntent, TuKhoa, CauTraLoi, LoaiGoiY, GiaTriGoiY, Link, ThuTu, LaQuickReply) VALUES
+('Chào hỏi',           'xin chao|chao|hello|hi|hey',
+ 'Chào bạn! Mình là **Hasaki Bot** - trợ lý mua sắm của bạn 💖\nMình có thể tư vấn sản phẩm, hướng dẫn đặt hàng và các chính sách. Bạn cần hỗ trợ gì ạ?',
+ 'none', NULL, NULL, 1, 0),
+('Cảm ơn',             'cam on|thanks|thank you|thx',
+ 'Hasaki rất vui được hỗ trợ bạn! Chúc bạn mua sắm vui vẻ 🌸',
+ 'none', NULL, NULL, 2, 0),
+('Tạm biệt',           'tam biet|bye|goodbye|hen gap lai',
+ 'Tạm biệt bạn! Hẹn gặp lại bạn lần sau 👋',
+ 'none', NULL, NULL, 3, 0),
+('Hướng dẫn đặt hàng', 'dat hang|cach mua|mua hang|mua nhu the nao|order|cach dat hang',
+ 'Để đặt hàng tại Hasaki, bạn làm theo 3 bước:\n1️⃣ Chọn sản phẩm và nhấn **Thêm vào giỏ hàng**\n2️⃣ Vào **Giỏ hàng** → kiểm tra số lượng → nhấn **Tiến hành thanh toán**\n3️⃣ Điền địa chỉ và chọn hình thức thanh toán (COD hoặc ATM/VNPay)\n\nSau khi đặt hàng, bạn sẽ nhận được mã đơn hàng và đơn hàng sẽ được giao trong 1-3 ngày!',
+ 'none', NULL, NULL, 10, 1),
+('Giao hàng',          'giao hang|ship|van chuyen|phi giao',
+ '🚚 **Chính sách giao hàng:**\n• Nội thành TP.HCM: 30 phút - 2 giờ\n• Tỉnh khác: 1-3 ngày\n• **Miễn phí giao hàng** cho đơn từ 200.000đ\n• Áp dụng cho tất cả sản phẩm có sẵn trong kho',
+ 'none', NULL, NULL, 11, 0),
+('Đổi trả',            'doi tra|tra hang|hoan tien|return|chinh sach doi tra',
+ '🔄 **Chính sách đổi trả:**\n• Đổi trả miễn phí trong **7 ngày**\n• Sản phẩm phải còn nguyên seal, chưa qua sử dụng\n• Hỗ trợ đổi trả tận nhà, không cần ra cửa hàng\n• Hoàn 100% nếu sản phẩm lỗi từ nhà sản xuất',
+ 'none', NULL, NULL, 12, 1),
+('Thanh toán',         'thanh toan|tra tien|payment|cod|vnpay|visa',
+ '💳 **Hasaki hỗ trợ các hình thức thanh toán:**\n• Thanh toán khi nhận hàng (COD)\n• Thẻ ATM nội địa / Internet Banking\n• Thẻ tín dụng Visa/Mastercard/JCB\n• Ví VNPay-QR\n• Chuyển khoản ngân hàng',
+ 'none', NULL, NULL, 13, 0),
+('Đăng ký',            'dang ky|tao tai khoan|register',
+ 'Bạn có thể đăng ký tài khoản miễn phí tại đây để nhận ưu đãi 💕',
+ 'none', NULL, 'register.php', 20, 0),
+('Đăng nhập',          'dang nhap|login|sign in',
+ 'Bạn có thể đăng nhập tại đây 👇',
+ 'none', NULL, 'login.php', 21, 0),
+('Tư vấn da khô',      'da kho',
+ 'Đối với **da khô** ☀️, Hasaki gợi ý:\n• Dùng sữa rửa mặt dịu nhẹ, không tạo bọt\n• Kem dưỡng giàu ceramide & hyaluronic acid\n• Tránh sản phẩm có cồn\n\nMột số sản phẩm phù hợp:',
+ 'search', 'duong', NULL, 30, 1),
+('Tư vấn da dầu',      'da dau|da nhon',
+ 'Đối với **da dầu** 💧, Hasaki khuyên dùng:\n• Sữa rửa mặt có salicylic acid (BHA)\n• Toner cân bằng pH\n• Kem chống nắng dạng gel/lotion thoáng\n\nGợi ý sản phẩm:',
+ 'search', 'lam sach', NULL, 31, 1),
+('Tư vấn da nhạy cảm', 'da nhay cam|kich ung',
+ 'Da nhạy cảm cần ưu tiên các sản phẩm dịu nhẹ, không hương liệu, không cồn. Bạn có thể thử **La Roche-Posay** hoặc **Bioderma** - các thương hiệu chuyên cho da nhạy cảm 🌸',
+ 'search', 'bioderma', NULL, 32, 0),
+('Trị mụn',            'mun|tri mun',
+ 'Để **trị mụn** hiệu quả, mình khuyên:\n• Rửa mặt 2 lần/ngày, tránh sờ tay lên mặt\n• Dùng BHA/AHA hoặc niacinamide\n• Hạn chế đường, sữa và đồ cay nóng\n• Uống đủ 2L nước/ngày\n\nNếu mụn nặng, bạn nên đi khám da liễu nha 💖',
+ 'none', NULL, NULL, 33, 0),
+('Son môi',            'son moi|son li|son tint|son',
+ 'Đây là một số mẫu son hot tại Hasaki 💋',
+ 'search', 'son', NULL, 40, 1),
+('Kem chống nắng',     'kem chong nang|sunscreen|spf|chong nang',
+ '☀️ Kem chống nắng là sản phẩm không thể thiếu mỗi ngày. Đây là gợi ý:',
+ 'search', 'chong nang', NULL, 41, 0),
+('Nước hoa',           'nuoc hoa|perfume',
+ '🌹 Nước hoa cao cấp tại Hasaki:',
+ 'search', 'nuoc hoa', NULL, 42, 0),
+('Phấn phủ',           'phan phu|phan trang diem|lop nen',
+ 'Một số sản phẩm phấn phủ / trang điểm hot:',
+ 'search', 'phan', NULL, 43, 0),
+('Sale - khuyến mãi',  'sale|giam gia|khuyen mai|uu dai|hot deal|san pham dang sale',
+ '🔥 Sản phẩm đang **giảm giá** tại Hasaki:',
+ 'featured', NULL, NULL, 50, 1),
+('Bán chạy',           'ban chay|hot|noi bat|pho bien|duoc yeu thich',
+ '⭐ Top sản phẩm bán chạy tại Hasaki:',
+ 'featured', NULL, NULL, 51, 0),
+('Mới ra mắt',         'moi nhat|moi ra mat|new arrival',
+ '✨ Sản phẩm mới ra mắt:',
+ 'newest', NULL, NULL, 52, 0),
+('Liên hệ',            'lien he|hotline|so dien thoai|sdt|contact|tu van',
+ '📞 **Liên hệ Hasaki:**\n• Hotline: 1900 1234 (8:00 - 22:00)\n• Email: support@hasaki.vn\n• Địa chỉ: 123 Lê Lợi, Q.1, TP.HCM\n• Fanpage Facebook: facebook.com/hasaki.vn',
+ 'none', NULL, NULL, 60, 0);

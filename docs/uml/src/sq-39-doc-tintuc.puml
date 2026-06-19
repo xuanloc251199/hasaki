@@ -1,0 +1,22 @@
+@startuml sq-39-doc-tintuc
+title Biểu đồ tuần tự - Đọc tin tức
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #FF5E8E
+  ParticipantBorderColor #FF5E8E
+  ParticipantBackgroundColor #FFF0F3
+}
+actor "Khách hàng" as U
+participant "NewsView" as V
+participant "SettingBLL" as B
+database "CSDL" as DB
+U -> V : Mở trang tin tức / bài viết
+activate V
+V -> B : get(noi_dung)
+B -> DB : SELECT nội dung trang
+DB --> B : dữ liệu
+B --> V : nội dung
+V --> U : Hiển thị bài viết
+deactivate V
+@enduml

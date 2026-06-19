@@ -1,0 +1,12 @@
+# Hasaki public web root
+DirectoryIndex index.php index.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Send /admin (without trailing slash) to /admin/index.php
+  RewriteRule ^admin$ admin/index.php [L]
+</IfModule>
+
+# Hide PHP error reporting except for development
+php_flag display_errors On

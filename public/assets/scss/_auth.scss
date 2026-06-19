@@ -1,0 +1,53 @@
+.auth-page {
+  min-height: 70vh;
+  background: $brand-bg-alt;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $sp-xl $sp;
+
+  .auth-card {
+    @include card;
+    width: 100%;
+    max-width: 480px;
+    padding: $sp-xl;
+    background: #fff;
+    h1 { text-align: center; margin: 0 0 $sp-sm 0; font-size: $fs-2xl; font-weight: 700; }
+    .subtitle { text-align: center; color: $brand-text-light; margin-bottom: $sp-md; font-size: 13px; }
+    .input { padding: 14px 18px; border-radius: 100px; }
+    .btn { padding: 14px; border-radius: 100px; }
+    .divider {
+      text-align: center;
+      color: $brand-text-light;
+      margin: $sp 0;
+      position: relative;
+      &::before, &::after {
+        content: '';
+        position: absolute; top: 50%;
+        width: 40%; height: 1px;
+        background: $brand-border;
+      }
+      &::before { left: 0; }
+      &::after { right: 0; }
+    }
+    .btn-social {
+      width: 100%;
+      padding: 12px;
+      border-radius: 100px;
+      border: 1px solid $brand-border;
+      background: #fff;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px;
+      font-weight: 600;
+      margin-bottom: $sp-sm;
+      &.btn-fb { background: #1877f2; color: #fff; border-color: #1877f2; }
+    }
+    .auth-links {
+      display: flex; justify-content: space-between;
+      margin-top: $sp;
+      font-size: 13px;
+      a { color: $brand-primary; font-weight: 600; }
+    }
+  }
+}

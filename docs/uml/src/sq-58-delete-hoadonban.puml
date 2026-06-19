@@ -1,0 +1,33 @@
+@startuml sq-58-delete-hoadonban
+title Biểu đồ tuần tự - Xóa hóa đơn bán
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #FF5E8E
+  ParticipantBorderColor #FF5E8E
+  ParticipantBackgroundColor #FFF0F3
+}
+actor "Nhân viên" as U
+participant "admin/invoices.php" as V
+participant "InvoiceBLL" as B
+participant "InvoiceDAL" as D
+database "CSDL" as DB
+U -> V : Chọn xóa hóa đơn bán
+activate V
+V --> U : "Bạn có chắc chắn muốn xóa hóa đơn bán này không?"
+alt Người dùng chọn Có
+  U -> V : Đồng ý
+  V -> B : delete(id)
+  activate B
+  B -> D : delete(id)
+  D -> DB : DELETE hóa đơn bán WHERE id=?
+  D --> B : ok
+  B --> V : thành công
+  V --> U : Cập nhật danh sách
+  deactivate B
+else Người dùng chọn Không
+  V --> U : Đóng thông báo
+end
+deactivate V
+
+@enduml

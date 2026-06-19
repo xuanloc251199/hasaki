@@ -1,0 +1,24 @@
+@startuml sq-33-quanly-giohang
+title Biểu đồ tuần tự - Quản lý giỏ hàng
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #FF5E8E
+  ParticipantBorderColor #FF5E8E
+  ParticipantBackgroundColor #FFF0F3
+}
+actor "Khách hàng" as U
+participant "CartView" as V
+participant "CartBLL" as B
+participant "Session" as S
+U -> V : Xem giỏ hàng
+activate V
+V -> B : getAll()
+activate B
+B -> S : Đọc $_SESSION[cart]
+B -> B : getTotal()
+B --> V : danh sách + tổng tiền
+deactivate B
+V --> U : Hiển thị giỏ hàng
+deactivate V
+@enduml

@@ -1,0 +1,42 @@
+@startuml sq-31-dangky
+title Biểu đồ tuần tự - Đăng ký tài khoản
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #FF5E8E
+  ParticipantBorderColor #FF5E8E
+  ParticipantBackgroundColor #FFF0F3
+}
+actor "Khách hàng" as U
+participant "RegisterView" as V
+participant "AuthBLL" as B
+participant "AccountDAL" as AD
+participant "CustomerDAL" as CD
+database "CSDL" as DB
+U -> V : Nhập tên, email, tên ĐN, mật khẩu
+activate V
+V -> B : register(...)
+activate B
+B -> AD : findByUsername(user)
+AD -> DB : SELECT ...
+DB --> AD : kết quả
+AD --> B : tồn tại?
+alt Hợp lệ
+  B -> B : password_hash()
+  B -> AD : create(taiKhoan)
+  AD -> DB : INSERT TaiKhoan
+  DB --> AD : MaTaiKhoan
+  AD --> B : MaTaiKhoan
+  B -> CD : create(khachHang)
+  CD -> DB : INSERT KhachHang
+  DB --> CD : MaKhachHang
+  CD --> B : ok
+  B --> V : thành công
+  V --> U : "Tạo tài khoản thành công"
+else Không hợp lệ
+  B --> V : lỗi
+  V --> U : Yêu cầu nhập lại
+end
+deactivate B
+deactivate V
+@enduml

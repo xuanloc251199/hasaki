@@ -1,0 +1,24 @@
+@startuml sq-77-them-vao-gio
+title Biểu đồ tuần tự - Thêm sản phẩm vào giỏ hàng
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #FF5E8E
+  ParticipantBorderColor #FF5E8E
+  ParticipantBackgroundColor #FFF0F3
+}
+actor "Khách hàng" as U
+participant "ProductView" as V
+participant "CartBLL" as B
+participant "Session" as S
+U -> V : Nhấn "Thêm vào giỏ" (id, số lượng)
+activate V
+V -> B : add(id, qty, options)
+activate B
+B -> S : $_SESSION[cart][id] = {qty, price}
+B -> B : getCount()
+B --> V : số lượng trong giỏ
+deactivate B
+V --> U : Thông báo "Đã thêm vào giỏ"
+deactivate V
+@enduml

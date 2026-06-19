@@ -1,0 +1,27 @@
+@startuml sq-37-timkiem-sanpham
+title Biểu đồ tuần tự - Tìm kiếm sản phẩm
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #FF5E8E
+  ParticipantBorderColor #FF5E8E
+  ParticipantBackgroundColor #FFF0F3
+}
+actor "Khách hàng" as U
+participant "ProductsView" as V
+participant "ProductBLL" as B
+participant "ProductDAL" as D
+database "CSDL" as DB
+U -> V : Nhập từ khóa
+activate V
+V -> B : search(keyword)
+activate B
+B -> D : search(keyword)
+D -> DB : SELECT ... WHERE TenSanPham LIKE ?
+DB --> D : kết quả
+D --> B : kết quả
+B --> V : danh sách
+deactivate B
+V --> U : Hiển thị kết quả + phân trang
+deactivate V
+@enduml

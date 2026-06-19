@@ -1,0 +1,68 @@
+.site-footer {
+  background: #1a1a1a;
+  color: #ccc;
+  padding: $sp-xl 0 $sp;
+  margin-top: $sp-xl;
+  font-size: $fs-base;
+
+  .footer-inner {
+    @include container;
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1.2fr;
+    gap: $sp-lg;
+    @include breakpoint($bp-md) {
+      grid-template-columns: 1fr 1fr;
+    }
+    @include breakpoint($bp-sm) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  h4 {
+    color: #fff;
+    font-size: $fs-md;
+    margin: 0 0 $sp 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  ul { list-style: none; padding: 0; margin: 0; }
+  li { margin-bottom: 8px; }
+  a { color: #ccc; &:hover { color: $brand-primary; } }
+
+  .footer-brand {
+    .logo {
+      font-family: 'Georgia', serif;
+      font-weight: 800;
+      font-size: 24px;
+      color: $brand-primary;
+      letter-spacing: 2px;
+      margin-bottom: $sp;
+    }
+    p { line-height: 1.8; color: #aaa; }
+  }
+
+  .socials {
+    display: flex;
+    gap: 10px;
+    margin-top: $sp;
+    a {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.08);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff;
+      &:hover { background: $brand-primary; color: #fff; }
+    }
+  }
+
+  .copyright {
+    @include container;
+    text-align: center;
+    border-top: 1px solid #333;
+    margin-top: $sp-lg;
+    padding-top: $sp;
+    color: #777;
+    font-size: 13px;
+  }
+}

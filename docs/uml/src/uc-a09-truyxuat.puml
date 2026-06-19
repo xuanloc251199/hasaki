@@ -1,0 +1,28 @@
+@startuml uc-a09-truyxuat
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #FFF0F3
+  BorderColor #FF5E8E
+  ArrowColor #444444
+}
+title Use case chi tiết - Truy xuất thông tin (UC09)
+actor "Admin" as ACT0
+rectangle "Truy xuất thông tin" {
+  usecase "Sản phẩm bán chạy nhất" as U0
+  usecase "Nhiều đơn đặt nhất" as U1
+  usecase "Nhiều lượt tương tác nhất" as U2
+  usecase "Doanh thu cao nhất" as U3
+  usecase "Đăng nhập" as LOGIN
+}
+ACT0 -- U0
+ACT0 -- U1
+ACT0 -- U2
+ACT0 -- U3
+U0 ..> LOGIN : <<include>>
+U1 ..> LOGIN : <<include>>
+U2 ..> LOGIN : <<include>>
+U3 ..> LOGIN : <<include>>
+@enduml

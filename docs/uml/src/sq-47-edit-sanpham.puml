@@ -1,0 +1,33 @@
+@startuml sq-47-edit-sanpham
+title Biểu đồ tuần tự - Sửa sản phẩm
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #FF5E8E
+  ParticipantBorderColor #FF5E8E
+  ParticipantBackgroundColor #FFF0F3
+}
+actor "Nhân viên" as U
+participant "admin/products.php" as V
+participant "ProductBLL" as B
+participant "ProductDAL" as D
+database "CSDL" as DB
+U -> V : Chọn sản phẩm cần sửa, nhập thông tin mới
+activate V
+V -> B : update(id, data)
+activate B
+B -> B : Kiểm tra dữ liệu
+alt Dữ liệu hợp lệ
+  B -> D : update(id, data)
+  D -> DB : UPDATE sản phẩm SET ... WHERE id=?
+  D --> B : ok
+  B --> V : thành công
+  V --> U : "Sửa sản phẩm thành công"
+else Không hợp lệ
+  B --> V : lỗi
+  V --> U : "Thông tin không hợp lệ"
+end
+deactivate B
+deactivate V
+
+@enduml

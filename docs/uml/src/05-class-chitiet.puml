@@ -1,0 +1,122 @@
+@startuml class-chitiet
+title Biểu đồ lớp chi tiết - Kiến trúc 3 lớp (HASAKI)
+skinparam shadowing false
+skinparam linetype ortho
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #FF5E8E
+  ArrowColor #444444
+  HeaderBackgroundColor #FFF0F3
+}
+
+package "Controller / View (public)" #F7FAFC {
+  class CheckoutController <<view>> {
+    +handleRequest()
+  }
+  class AdminProductController <<view>> {
+    +handleRequest()
+  }
+}
+
+package "Business Layer (src/Business)" #FFF8FB {
+  class AuthBLL {
+    +login(u, p) : array
+    +register(...) : int
+    +changePassword(...) : bool
+    +logout() : void
+  }
+  class CartBLL {
+    +add(id, qty, opts) : void
+    +update(id, qty) : void
+    +remove(id) : void
+    +getAll() : array
+    +getTotal() : float
+  }
+  class ProductBLL {
+    +getAll() : array
+    +getById(id) : array
+    +search(kw) : array
+    +getRelated(id) : array
+    +create(data) : int
+    +update(id, data) : bool
+    +delete(id) : bool
+  }
+  class InvoiceBLL {
+    +checkout(cid, items, info) : int
+    +getById(id) : array
+    +updateStatus(id, st) : bool
+    +revenueTrend(p) : array
+    +topProducts() : array
+  }
+  class ImportInvoiceBLL {
+    +createImport(info, items) : array
+    +updateImport(id, info, items) : array
+    +delete(id) : bool
+  }
+}
+
+package "DataAccess Layer (src/DataAccess)" #F5FAFF {
+  abstract class BaseDAL {
+    #db : PDO
+    +__construct()
+  }
+  class ProductDAL {
+    +getAll() : array
+    +getById(id) : array
+    +search(kw) : array
+    +create(data) : int
+    +update(id, data) : bool
+    +delete(id) : bool
+    +decreaseStock(id, qty) : bool
+    +increaseStock(id, qty) : bool
+  }
+  class InvoiceDAL {
+    +getAll() : array
+    +getById(id) : array
+    +create(inv, items) : int
+    +updateStatus(id, st) : bool
+    +delete(id) : bool
+  }
+  class ImportInvoiceDAL {
+    +getAll() : array
+    +create(inv, items) : int
+    +update(id, inv, items) : bool
+    +delete(id) : bool
+  }
+  class WarehouseDAL {
+    +getAll() : array
+    +addStock(...) : bool
+    +reduceStock(id, qty) : bool
+  }
+}
+
+package "Database" #FFFFFF {
+  class MySQL <<database>>
+}
+
+' Quan hệ kế thừa DAL
+BaseDAL <|-- ProductDAL
+BaseDAL <|-- InvoiceDAL
+BaseDAL <|-- ImportInvoiceDAL
+BaseDAL <|-- WarehouseDAL
+
+' Controller -> BLL
+CheckoutController ..> InvoiceBLL
+CheckoutController ..> CartBLL
+AdminProductController ..> ProductBLL
+
+' BLL -> DAL
+ProductBLL ..> ProductDAL
+InvoiceBLL ..> InvoiceDAL
+InvoiceBLL ..> ProductDAL
+ImportInvoiceBLL ..> ImportInvoiceDAL
+ImportInvoiceBLL ..> ProductDAL
+ImportInvoiceBLL ..> WarehouseDAL
+
+' DAL -> DB
+ProductDAL ..> MySQL
+InvoiceDAL ..> MySQL
+ImportInvoiceDAL ..> MySQL
+WarehouseDAL ..> MySQL
+
+@enduml

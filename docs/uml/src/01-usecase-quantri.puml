@@ -1,0 +1,57 @@
+@startuml usecase-quantri
+title Biểu đồ Use Case tổng quát - Trang Quản trị (HASAKI)
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #FFF0F3
+  BorderColor #FF5E8E
+  ArrowColor #444444
+}
+
+actor "Nhân viên" as NV
+actor "Admin" as AD
+
+' Admin kế thừa toàn bộ quyền của Nhân viên
+AD --|> NV
+
+rectangle "Hệ thống quản trị HASAKI" {
+  usecase "Đăng nhập" as UC_LOGIN
+  usecase "Quản lý khách hàng" as UC01
+  usecase "Quản lý sản phẩm" as UC02
+  usecase "Quản lý hóa đơn bán" as UC03
+  usecase "Quản lý hóa đơn nhập" as UC04
+  usecase "Quản lý kho hàng" as UC07
+  usecase "Quản lý tài khoản" as UC05
+  usecase "Quản lý nhân viên" as UC06
+  usecase "Thống kê" as UC08
+  usecase "Quản lý AI Chatbot" as UC10
+}
+
+' Quyền của Nhân viên
+NV -- UC_LOGIN
+NV -- UC01
+NV -- UC02
+NV -- UC03
+NV -- UC04
+NV -- UC07
+
+' Quyền riêng của Admin
+AD -- UC05
+AD -- UC06
+AD -- UC08
+AD -- UC10
+
+' Tiền điều kiện: phải đăng nhập
+UC01 ..> UC_LOGIN : <<include>>
+UC02 ..> UC_LOGIN : <<include>>
+UC03 ..> UC_LOGIN : <<include>>
+UC04 ..> UC_LOGIN : <<include>>
+UC05 ..> UC_LOGIN : <<include>>
+UC06 ..> UC_LOGIN : <<include>>
+UC07 ..> UC_LOGIN : <<include>>
+UC08 ..> UC_LOGIN : <<include>>
+UC10 ..> UC_LOGIN : <<include>>
+
+@enduml

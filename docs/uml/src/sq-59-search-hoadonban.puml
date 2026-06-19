@@ -1,0 +1,35 @@
+@startuml sq-59-search-hoadonban
+title Biểu đồ tuần tự - Tìm kiếm hóa đơn bán
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #FF5E8E
+  ParticipantBorderColor #FF5E8E
+  ParticipantBackgroundColor #FFF0F3
+}
+actor "Nhân viên" as U
+participant "admin/invoices.php" as V
+participant "InvoiceBLL" as B
+participant "InvoiceDAL" as D
+database "CSDL" as DB
+U -> V : Nhập từ khóa tìm hóa đơn bán
+activate V
+V -> B : search(keyword)
+activate B
+B -> D : search(keyword)
+D -> DB : SELECT ... WHERE ... LIKE ?
+alt Có kết quả
+  DB --> D : dữ liệu khớp
+  D --> B : kết quả
+  B --> V : kết quả
+  V --> U : Hiển thị kết quả tìm kiếm
+else Không khớp
+  DB --> D : rỗng
+  D --> B : rỗng
+  B --> V : rỗng
+  V --> U : Hiển thị bảng trắng
+end
+deactivate B
+deactivate V
+
+@enduml

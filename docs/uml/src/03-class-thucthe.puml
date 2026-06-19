@@ -1,0 +1,146 @@
+@startuml class-thucthe
+title Biểu đồ lớp thực thể (Domain Model) - HASAKI
+skinparam shadowing false
+skinparam linetype ortho
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #FF5E8E
+  ArrowColor #444444
+  HeaderBackgroundColor #FFF0F3
+}
+hide methods
+hide circle
+
+class LoaiTaiKhoan {
+  +MaLoaiTaiKhoan : int
+  TenLoaiTaiKhoan : string
+  MoTa : string
+}
+
+class TaiKhoan {
+  +MaTaiKhoan : int
+  TenTaiKhoan : string
+  MatKhau : string
+  LoaiTaiKhoan : int
+  TrangThai : tinyint
+  NgayTao : datetime
+}
+
+class NhanVien {
+  +MaNV : int
+  TenNV : string
+  DiaChi : string
+  SDT : string
+  Email : string
+  CMND : string
+  GioiTinh : string
+  AnhNhanVien : string
+  MaTaiKhoan : int
+}
+
+class KhachHang {
+  +MaKhachHang : int
+  TenKhachHang : string
+  DiaChi : string
+  SDT : string
+  Email : string
+  GioiTinh : string
+  MaTaiKhoan : int
+  NgayDangKy : datetime
+}
+
+class DanhMuc {
+  +MaDanhMuc : int
+  TenDanhMuc : string
+  MoTa : string
+  AnhDanhMuc : string
+}
+
+class SanPham {
+  +MaSanPham : int
+  MaDanhMuc : int
+  TenSanPham : string
+  ThuongHieu : string
+  XuatXu : string
+  GiaBan : decimal
+  SoLuong : int
+  MoTa : text
+  HinhAnh : string
+  Sale : string
+  NgayTao : datetime
+}
+
+class HoaDonBan {
+  +MaHoaDon : int
+  NgayBan : datetime
+  ThanhTien : decimal
+  MaKhachHang : int
+  SDT : string
+  DiaChiGH : string
+  HinhThucTT : string
+  TrangThai : int
+}
+
+class ChiTietHoaDonBan {
+  +MaChiTietHoaDon : int
+  MaHoaDon : int
+  MaSanPham : int
+  TenSanPham : string
+  SoLuong : int
+  GiaBan : decimal
+}
+
+class HoaDonNhap {
+  +MaHoaDon : int
+  NgayNhap : datetime
+  ThanhTien : decimal
+  TenNCC : string
+  SDT : string
+  MaNV : int
+  DiaChiLayHang : string
+}
+
+class ChiTietHoaDonNhap {
+  +MaChiTietHoaDon : int
+  MaHoaDon : int
+  MaSanPham : int
+  TenSanPham : string
+  SoLuong : int
+  GiaNhap : decimal
+}
+
+class KhoHang {
+  +MaKho : int
+  MaSanPham : int
+  TenSanPham : string
+  SoLuongCon : int
+  NgayNhap : date
+  LoaiSanPham : string
+}
+
+class DanhGia {
+  +MaDanhGia : int
+  MaSanPham : int
+  MaKhachHang : int
+  TenNguoiDanhGia : string
+  SoSao : tinyint
+  NoiDung : text
+  NgayDanhGia : datetime
+}
+
+' Quan hệ
+LoaiTaiKhoan "1" -- "0..*" TaiKhoan
+TaiKhoan "1" -- "0..1" NhanVien
+TaiKhoan "1" -- "0..1" KhachHang
+DanhMuc "1" -- "0..*" SanPham
+KhachHang "1" -- "0..*" HoaDonBan
+HoaDonBan "1" *-- "1..*" ChiTietHoaDonBan
+SanPham "1" -- "0..*" ChiTietHoaDonBan
+NhanVien "1" -- "0..*" HoaDonNhap
+HoaDonNhap "1" *-- "1..*" ChiTietHoaDonNhap
+SanPham "1" -- "0..*" ChiTietHoaDonNhap
+SanPham "1" -- "0..*" KhoHang
+SanPham "1" -- "0..*" DanhGia
+KhachHang "1" -- "0..*" DanhGia
+
+@enduml

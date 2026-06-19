@@ -1,0 +1,33 @@
+@startuml sq-80-them-intent
+title Biểu đồ tuần tự - Thêm Intent AI Chatbot (Admin)
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #FF5E8E
+  ParticipantBorderColor #FF5E8E
+  ParticipantBackgroundColor #FFF0F3
+}
+actor "Admin" as U
+participant "ChatbotView" as V
+participant "ChatbotBLL" as B
+participant "ChatbotDAL" as D
+database "CSDL" as DB
+U -> V : Nhập tên intent, từ khóa, câu trả lời, loại gợi ý
+activate V
+V -> B : adminCreateIntent(data)
+activate B
+B -> B : Kiểm tra dữ liệu
+alt Hợp lệ
+  B -> D : insertIntent(data)
+  D -> DB : INSERT ChatbotIntent
+  DB --> D : MaIntent
+  D --> B : ok
+  B --> V : thành công
+  V --> U : "Đã thêm intent"
+else Không hợp lệ
+  B --> V : lỗi
+  V --> U : "Tên/Từ khóa/Câu trả lời không được trống"
+end
+deactivate B
+deactivate V
+@enduml

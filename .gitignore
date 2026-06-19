@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Sessions/cache
+session/
+
+# Uploads (keep folder, ignore files)
+public/assets/images/uploads/*
+!public/assets/images/uploads/.gitkeep
+
+# Build artifacts
+*.log

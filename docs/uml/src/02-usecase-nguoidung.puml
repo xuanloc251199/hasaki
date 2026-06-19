@@ -1,0 +1,52 @@
+@startuml usecase-nguoidung
+title Biểu đồ Use Case tổng quát - Trang Người dùng (HASAKI)
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #FFF0F3
+  BorderColor #FF5E8E
+  ArrowColor #444444
+}
+
+actor "Khách hàng" as KH
+actor "Khách vãng lai" as GUEST
+
+rectangle "Website bán mỹ phẩm HASAKI" {
+  usecase "Đăng ký" as UC05
+  usecase "Đăng nhập" as UC04
+  usecase "Xem sản phẩm" as UC02
+  usecase "Tìm kiếm sản phẩm" as UC_SEARCH
+  usecase "Xem chi tiết sản phẩm" as UC_DETAIL
+  usecase "Quản lý giỏ hàng" as UC03
+  usecase "Đặt hàng / Thanh toán" as UC_ORDER
+  usecase "Quản lý đơn hàng" as UC01
+  usecase "Quản lý tài khoản" as UC_PROFILE
+  usecase "Trò chuyện với AI Chatbot" as UC06
+}
+
+' Khách vãng lai
+GUEST -- UC05
+GUEST -- UC02
+GUEST -- UC_SEARCH
+GUEST -- UC_DETAIL
+GUEST -- UC06
+
+' Khách hàng kế thừa khách vãng lai
+KH --|> GUEST
+KH -- UC04
+KH -- UC03
+KH -- UC_ORDER
+KH -- UC01
+KH -- UC_PROFILE
+
+' Quan hệ giữa các use case
+UC02 ..> UC_DETAIL : <<extend>>
+UC_DETAIL ..> UC03 : <<extend>>
+UC03 ..> UC_ORDER : <<extend>>
+UC_ORDER ..> UC04 : <<include>>
+UC01 ..> UC04 : <<include>>
+UC_PROFILE ..> UC04 : <<include>>
+
+@enduml

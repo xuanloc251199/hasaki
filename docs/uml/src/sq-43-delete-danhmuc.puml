@@ -1,0 +1,33 @@
+@startuml sq-43-delete-danhmuc
+title Biểu đồ tuần tự - Xóa danh mục
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #FF5E8E
+  ParticipantBorderColor #FF5E8E
+  ParticipantBackgroundColor #FFF0F3
+}
+actor "Nhân viên" as U
+participant "admin/categories.php" as V
+participant "CategoryBLL" as B
+participant "CategoryDAL" as D
+database "CSDL" as DB
+U -> V : Chọn xóa danh mục
+activate V
+V --> U : "Bạn có chắc chắn muốn xóa danh mục này không?"
+alt Người dùng chọn Có
+  U -> V : Đồng ý
+  V -> B : delete(id)
+  activate B
+  B -> D : delete(id)
+  D -> DB : DELETE danh mục WHERE id=?
+  D --> B : ok
+  B --> V : thành công
+  V --> U : Cập nhật danh sách
+  deactivate B
+else Người dùng chọn Không
+  V --> U : Đóng thông báo
+end
+deactivate V
+
+@enduml

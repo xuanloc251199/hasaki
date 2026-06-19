@@ -1,0 +1,35 @@
+@startuml sq-44-search-danhmuc
+title Biểu đồ tuần tự - Tìm kiếm danh mục
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #FF5E8E
+  ParticipantBorderColor #FF5E8E
+  ParticipantBackgroundColor #FFF0F3
+}
+actor "Nhân viên" as U
+participant "admin/categories.php" as V
+participant "CategoryBLL" as B
+participant "CategoryDAL" as D
+database "CSDL" as DB
+U -> V : Nhập từ khóa tìm danh mục
+activate V
+V -> B : search(keyword)
+activate B
+B -> D : search(keyword)
+D -> DB : SELECT ... WHERE ... LIKE ?
+alt Có kết quả
+  DB --> D : dữ liệu khớp
+  D --> B : kết quả
+  B --> V : kết quả
+  V --> U : Hiển thị kết quả tìm kiếm
+else Không khớp
+  DB --> D : rỗng
+  D --> B : rỗng
+  B --> V : rỗng
+  V --> U : Hiển thị bảng trắng
+end
+deactivate B
+deactivate V
+
+@enduml

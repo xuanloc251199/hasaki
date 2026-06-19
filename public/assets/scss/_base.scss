@@ -1,0 +1,225 @@
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: $font-base;
+  color: $brand-text;
+  background: $brand-bg-alt;
+  font-size: $fs-base;
+  line-height: 1.55;
+}
+
+// Anchor inherits color from parent so dark/light contexts (e.g. dark footer)
+// don't get overridden. Default hover uses brand color but is wrapped in
+// :where() so its specificity is 0 — any explicit Tailwind text-* utility
+// (e.g. text-white on a CTA button) wins on hover.
+:where(a) { color: inherit; text-decoration: none; transition: color .15s; }
+:where(a:hover) { color: $brand-primary; }
+
+img { max-width: 100%; display: block; }
+
+// Reset button defaults so unstyled <button> looks like inline elements
+// (Tailwind preflight is disabled in tailwind.config.js to avoid clashing
+//  with this SCSS reset, so we re-add the reset here)
+button {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-align: inherit;
+}
+
+h1, h2, h3, h4 { color: $brand-secondary; line-height: 1.25; }
+
+.container { @include container; }
+
+.btn { @include button; }
+.btn-outline {
+  @include button(transparent, $brand-secondary);
+  border: 1px solid $brand-border;
+}
+.btn-dark { @include button($brand-secondary, #fff); }
+.btn-mint { @include button($brand-mint, #fff); }
+.btn-danger { @include button($brand-danger, #fff); }
+.btn-block { width: 100%; }
+
+.alert {
+  padding: 12px 16px;
+  border-radius: $radius;
+  margin-bottom: $sp;
+  font-size: $fs-base;
+  &.alert-error { background: #ffe8eb; color: #b3083b; border: 1px solid #ffc6cf; }
+  &.alert-success { background: #e3f9e9; color: #126b2a; border: 1px solid #b6ecc4; }
+}
+
+.input,
+input:not([type=submit]):not([type=button]):not([type=checkbox]):not([type=radio]):not([type=file]):not([type=color]):not([type=range]):not([type=image]),
+select,
+textarea {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: $fs-base;
+  font-family: inherit;
+  background: #fff;
+  color: $brand-text;
+  border: 1px solid $brand-border;
+  border-radius: $radius;
+  transition: border-color .2s, box-shadow .2s;
+  outline: none;
+  &:focus {
+    border-color: $brand-primary;
+    box-shadow: 0 0 0 3px rgba($brand-primary, .15);
+  }
+  &:disabled {
+    background: $brand-bg-alt;
+    color: $brand-text-light;
+    cursor: not-allowed;
+  }
+}
+
+input[type=file] {
+  width: 100%;
+  padding: 8px;
+  font-size: $fs-base;
+  background: $brand-bg-alt;
+  border: 1px dashed $brand-border;
+  border-radius: $radius;
+  cursor: pointer;
+  &:hover { border-color: $brand-primary; }
+}
+
+// Password field with show/hide toggle
+.pw-field {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  background: #fff;
+  border: 1px solid $brand-border;
+  border-radius: $radius;
+  overflow: hidden;
+  transition: border-color .2s, box-shadow .2s;
+
+  &:focus-within {
+    border-color: $brand-primary;
+    box-shadow: 0 0 0 3px rgba($brand-primary, .15);
+  }
+
+  // The icon in front of input (optional, e.g. lock icon)
+  > .pw-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0 0 14px;
+    color: $brand-text-light;
+    font-size: $fs-base;
+    pointer-events: none;
+  }
+
+  // The actual password input - reset all borders/shadow
+  input {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 12px;
+    font-size: $fs-base;
+    font-family: inherit;
+    background: transparent;
+    color: $brand-text;
+    border: 0 !important;
+    border-radius: 0;
+    outline: none !important;
+    box-shadow: none !important;
+    width: auto;
+
+    &:focus {
+      box-shadow: none !important;
+      border: 0 !important;
+    }
+  }
+
+  // Eye toggle button
+  > .pw-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 14px;
+    color: $brand-text-light;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: color .15s;
+    font-size: $fs-base;
+
+    &:hover {
+      color: $brand-primary;
+      background: rgba($brand-primary, .04);
+    }
+  }
+}
+
+textarea { resize: vertical; min-height: 100px; }
+
+label { display: block; margin-bottom: 6px; font-weight: 600; font-size: $fs-base; }
+
+.form-group { margin-bottom: $sp; }
+
+.row { display: flex; flex-wrap: wrap; gap: $sp; }
+.row > .col { flex: 1; min-width: 240px; }
+
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.muted { color: $brand-text-light; }
+.mt-0 { margin-top: 0 !important; }
+.mt-1 { margin-top: $sp-sm; }
+.mt-2 { margin-top: $sp; }
+.mt-3 { margin-top: $sp-md; }
+.mb-2 { margin-bottom: $sp; }
+.mb-3 { margin-bottom: $sp-md; }
+
+.badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  background: $brand-bg-alt;
+  color: $brand-text;
+  &.badge-sale { background: $brand-primary; color: #fff; }
+  &.badge-new { background: $brand-mint; color: #fff; }
+  &.badge-status-0 { background: #fff4e0; color: #d57e00; }
+  &.badge-status-1 { background: #e1efff; color: #1565c0; }
+  &.badge-status-2 { background: #e3f9e9; color: #126b2a; }
+  &.badge-status-3 { background: #ffe8eb; color: #b3083b; }
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: $radius;
+  overflow: hidden;
+  box-shadow: $shadow-sm;
+
+  th, td {
+    padding: 12px 14px;
+    text-align: left;
+    border-bottom: 1px solid $brand-border;
+    font-size: $fs-base;
+    vertical-align: middle;
+  }
+  th {
+    background: $brand-bg-alt;
+    font-weight: 600;
+    color: $brand-secondary;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: .5px;
+  }
+  tbody tr:hover { background: #fafafa; }
+  td.actions { white-space: nowrap; }
+}
