@@ -67,6 +67,8 @@ if ($action === 'edit') {
 
 $keyword = trim($_GET['q'] ?? '');
 $products = $keyword !== '' ? $productBLL->search($keyword) : $productBLL->getAll();
+$pg = paginate($products, current_page(), 10);
+$products = $pg['items'];
 $categories = $categoryBLL->getAll();
 
 require __DIR__ . '/includes/layout-top.php';
@@ -104,6 +106,8 @@ require __DIR__ . '/includes/layout-top.php';
     <?php endforeach; endif; ?>
   </tbody>
 </table>
+
+<?= render_pagination($pg['page'], $pg['total_pages'], $keyword !== '' ? ['q' => $keyword] : []) ?>
 
 <!-- Create modal -->
 <div class="modal-bg" id="modal-create" style="display:none">

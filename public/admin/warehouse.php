@@ -26,6 +26,8 @@ if ($action === 'delete') {
 
 $keyword = trim($_GET['q'] ?? '');
 $rows = $keyword !== '' ? $dal->search($keyword) : $dal->getAll();
+$pg = paginate($rows, current_page(), 10);
+$rows = $pg['items'];
 $edit = $action === 'edit' ? $dal->getById((int)$_GET['id']) : null;
 
 require __DIR__ . '/includes/layout-top.php';
@@ -35,7 +37,7 @@ require __DIR__ . '/includes/layout-top.php';
     <input type="text" name="q" placeholder="Tìm kho hàng..." value="<?= e($keyword) ?>">
     <button><i class="fa-solid fa-magnifying-glass"></i></button>
   </form>
-  <p class="muted" style="margin:0">Tổng: <strong><?= count($rows) ?></strong> mục</p>
+  <p class="muted" style="margin:0">Tổng: <strong><?= $pg['total'] ?></strong> mục</p>
 </div>
 
 <table class="table">
@@ -59,6 +61,8 @@ require __DIR__ . '/includes/layout-top.php';
     <?php endforeach; endif; ?>
   </tbody>
 </table>
+
+<?= render_pagination($pg['page'], $pg['total_pages'], $keyword !== '' ? ['q' => $keyword] : []) ?>
 
 <?php if ($edit): ?>
 <div class="modal-bg" style="display:flex">

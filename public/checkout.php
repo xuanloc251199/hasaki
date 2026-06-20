@@ -4,8 +4,6 @@ require_once __DIR__ . '/../src/Business/CartBLL.php';
 require_once __DIR__ . '/../src/Business/InvoiceBLL.php';
 require_once __DIR__ . '/../src/Business/CustomerBLL.php';
 
-require_login();
-
 $cart = new CartBLL();
 $items = $cart->getItems();
 $total = $cart->total();
@@ -16,8 +14,17 @@ if (empty($items)) {
 }
 
 $customerBLL = new CustomerBLL();
-$customer = $customerBLL->getByAccount((int)$_SESSION['user_id']);
+$isGuest  = !is_logged_in();
+$customer = $isGuest ? null : $customerBLL->getByAccount((int)$_SESSION['user_id']);
 $err = null;
+
+// Guests can order (a customer profile is created from the form below). But a
+// logged-in admin/staff account has no customer profile and no valid
+// MaKhachHang, so it is still blocked instead of crashing on the FK constraint.
+if (!$isGuest && !$customer) {
+  set_flash_error('Tài khoản quản trị/nhân viên không thể đặt hàng. Vui lòng dùng tài khoản khách hàng để mua hàng.');
+  redirect(url('cart.php'));
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $invoiceBLL = new InvoiceBLL();
@@ -28,13 +35,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     'GhiChu'     => trim($_POST['note'] ?? ''),
     'HinhThucTT' => $_POST['payment'] ?? 'COD',
   ];
-  $res = $invoiceBLL->checkout((int)$customer['MaKhachHang'], $info, $items);
-  if (isset($res['error'])) {
-    $err = $res['error'];
+
+  // Resolve the customer id: existing profile for members, or a freshly created
+  // guest profile (MaTaiKhoan = NULL) built from the checkout form.
+  $maKhachHang = 0;
+  if ($isGuest) {
+    $fullname = trim($_POST['fullname'] ?? '');
+    if ($fullname === '')             $err = 'Vui lòng nhập họ và tên';
+    elseif ($info['SDT'] === '')      $err = 'Vui lòng nhập số điện thoại';
+    elseif ($info['DiaChiGH'] === '') $err = 'Vui lòng nhập địa chỉ giao hàng';
+    else {
+      $created = $customerBLL->create([
+        'TenKhachHang' => $fullname,
+        'DiaChi'       => $info['DiaChiGH'],
+        'SDT'          => $info['SDT'],
+        'Email'        => $info['Email'],
+        'GioiTinh'     => null,
+        'MaTaiKhoan'   => null,
+      ]);
+      isset($created['error']) ? ($err = $created['error']) : ($maKhachHang = (int)$created['id']);
+    }
   } else {
-    $cart->clear();
-    set_flash_success('Đặt hàng thành công! Mã đơn hàng: #' . $res['invoice_id']);
-    redirect(url('order-success.php?id=' . $res['invoice_id']));
+    $maKhachHang = (int)$customer['MaKhachHang'];
+  }
+
+  if (!$err) {
+    $res = $invoiceBLL->checkout($maKhachHang, $info, $items);
+    if (isset($res['error'])) {
+      $err = $res['error'];
+    } else {
+      if ($isGuest) $_SESSION['guest_orders'][] = (int)$res['invoice_id'];
+      $cart->clear();
+      set_flash_success('Đặt hàng thành công! Mã đơn hàng: #' . $res['invoice_id']);
+      redirect(url('order-success.php?id=' . $res['invoice_id']));
+    }
   }
 }
 
@@ -84,6 +118,14 @@ require __DIR__ . '/includes/header.php';
         </div>
       <?php endif; ?>
 
+      <?php if ($isGuest): ?>
+        <div class="bg-blue-50 border border-blue-200 text-blue-700 text-sm rounded-xl p-3 flex items-center gap-2">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>Bạn đang đặt hàng với tư cách khách. Đã có tài khoản?
+            <a href="<?= url('login.php') ?>" class="font-semibold underline">Đăng nhập</a> để theo dõi đơn hàng dễ hơn.</span>
+        </div>
+      <?php endif; ?>
+
       <!-- Shipping info -->
       <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
         <h3 class="text-base font-bold flex items-center gap-2 mb-4">
@@ -91,8 +133,12 @@ require __DIR__ . '/includes/header.php';
         </h3>
         <div class="space-y-4">
           <div>
-            <label class="!text-xs !font-semibold !text-gray-700 !mb-1.5 block uppercase tracking-wider">Họ và tên</label>
-            <input type="text" value="<?= e($customer['TenKhachHang'] ?? '') ?>" disabled>
+            <label class="!text-xs !font-semibold !text-gray-700 !mb-1.5 block uppercase tracking-wider">Họ và tên <?= $isGuest ? '*' : '' ?></label>
+            <?php if ($isGuest): ?>
+              <input type="text" name="fullname" required value="<?= e($_POST['fullname'] ?? '') ?>" placeholder="Nhập họ và tên người nhận">
+            <?php else: ?>
+              <input type="text" value="<?= e($customer['TenKhachHang'] ?? '') ?>" disabled>
+            <?php endif; ?>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -121,7 +167,7 @@ require __DIR__ . '/includes/header.php';
           <i class="fa-solid fa-credit-card text-brand-500"></i> Hình thức thanh toán
         </h3>
         <div class="space-y-2">
-          <label class="flex items-center gap-3 p-4 rounded-xl border-2 border-brand-500 bg-brand-50 cursor-pointer payment-option active">
+          <label class="flex items-center gap-3 p-4 rounded-xl border-2 border-gray-200 cursor-pointer hover:border-brand-300 payment-option">
             <input type="radio" name="payment" value="COD" checked class="w-5 h-5 accent-brand-500">
             <div class="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-brand-500 text-xl shrink-0">
               <i class="fa-solid fa-truck"></i>
@@ -209,18 +255,26 @@ require __DIR__ . '/includes/header.php';
   </form>
 </div>
 
+<style>
+  /* Highlight the selected payment option (driven by the checked radio) */
+  .payment-option.active { border-color: #DD2D4A; background: #FDF2F4; }
+  .payment-option.active .font-semibold { color: #DD2D4A; }
+</style>
 <script>
-// Update payment-option active state
-document.querySelectorAll('.payment-option').forEach(opt => {
-  opt.addEventListener('click', () => {
-    document.querySelectorAll('.payment-option').forEach(o => {
-      o.classList.remove('!border-brand-500', '!bg-brand-50', 'active');
-      o.classList.add('border-gray-200');
+// Reflect the checked payment radio as the highlighted option (only one at a time)
+(function () {
+  var options = document.querySelectorAll('.payment-option');
+  function sync() {
+    var checked = document.querySelector('input[name="payment"]:checked');
+    options.forEach(function (o) {
+      o.classList.toggle('active', !!checked && o.contains(checked));
     });
-    opt.classList.add('!border-brand-500', '!bg-brand-50', 'active');
-    opt.classList.remove('border-gray-200');
+  }
+  document.querySelectorAll('input[name="payment"]').forEach(function (r) {
+    r.addEventListener('change', sync);
   });
-});
+  sync();
+})();
 </script>
 
 <?php require __DIR__ . '/includes/footer.php'; ?>

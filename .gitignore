@@ -19,3 +19,12 @@ public/assets/images/uploads/*
 
 # Build artifacts
 *.log
+
+# Claude Code (local tooling, worktrees, sessions)
+.claude/
+
+# Docs (loai khoi repo theo yeu cau)
+docs/
+
+# Crash artifacts
+*.stackdump

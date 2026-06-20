@@ -37,6 +37,8 @@ if ($action === 'delete') {
 
 $keyword = trim($_GET['q'] ?? '');
 $rows = $keyword !== '' ? $bll->search($keyword) : $bll->getAll();
+$pg = paginate($rows, current_page(), 10);
+$rows = $pg['items'];
 $edit = $action === 'edit' ? $bll->getById((int)$_GET['id']) : null;
 
 require __DIR__ . '/includes/layout-top.php';
@@ -70,6 +72,8 @@ require __DIR__ . '/includes/layout-top.php';
     <?php endforeach; endif; ?>
   </tbody>
 </table>
+
+<?= render_pagination($pg['page'], $pg['total_pages'], $keyword !== '' ? ['q' => $keyword] : []) ?>
 
 <div class="modal-bg" id="modal-create" style="display:none">
   <div class="modal">

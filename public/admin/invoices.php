@@ -24,6 +24,8 @@ $details = $view ? $bll->getDetails((int)$view['MaHoaDon']) : [];
 
 $keyword = trim($_GET['q'] ?? '');
 $rows = $keyword !== '' ? $bll->search($keyword) : $bll->getAll();
+$pg = paginate($rows, current_page(), 10);
+$rows = $pg['items'];
 
 require __DIR__ . '/includes/layout-top.php';
 ?>
@@ -56,6 +58,8 @@ require __DIR__ . '/includes/layout-top.php';
     <?php endforeach; endif; ?>
   </tbody>
 </table>
+
+<?= render_pagination($pg['page'], $pg['total_pages'], $keyword !== '' ? ['q' => $keyword] : []) ?>
 
 <?php if ($view): ?>
 <div class="modal-bg" style="display:flex">

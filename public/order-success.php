@@ -2,12 +2,14 @@
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../src/Business/InvoiceBLL.php';
 
-require_login();
-
 $id = (int)($_GET['id'] ?? 0);
 $invoiceBLL = new InvoiceBLL();
 $invoice = $invoiceBLL->getById($id);
-if (!$invoice) {
+
+// Members may view orders (as before); guests may only view an order they just
+// placed in this session, not arbitrary order ids.
+$isOwnGuestOrder = in_array($id, $_SESSION['guest_orders'] ?? [], true);
+if (!$invoice || (!is_logged_in() && !$isOwnGuestOrder)) {
   redirect(url('index.php'));
 }
 $details = $invoiceBLL->getDetails($id);
@@ -30,7 +32,7 @@ require __DIR__ . '/includes/header.php';
     <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
       <a href="<?= url('invoice-print.php?id=' . (int)$invoice['MaHoaDon'] . '&print=1') ?>" target="_blank" class="btn-outline btn"><i class="fa-solid fa-print"></i> In hóa đơn</a>
       <a href="<?= url('invoice-print.php?id=' . (int)$invoice['MaHoaDon'] . '&download=1') ?>" class="btn-outline btn"><i class="fa-solid fa-download"></i> Tải đơn</a>
-      <a href="<?= url('account.php') ?>" class="btn-outline btn">Xem đơn hàng</a>
+      <?php if (is_logged_in()): ?><a href="<?= url('account.php') ?>" class="btn-outline btn">Xem đơn hàng</a><?php endif; ?>
       <a href="<?= url('products.php') ?>" class="btn">Tiếp tục mua sắm</a>
     </div>
   </div>

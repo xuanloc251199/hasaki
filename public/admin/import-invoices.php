@@ -57,6 +57,8 @@ if ($action === 'delete') {
 
 $keyword = trim($_GET['q'] ?? '');
 $rows = $keyword !== '' ? $bll->search($keyword) : $bll->getAll();
+$pg = paginate($rows, current_page(), 10);
+$rows = $pg['items'];
 $view = $action === 'view' ? $bll->getById((int)$_GET['id']) : null;
 $details = $view ? $bll->getDetails((int)$view['MaHoaDon']) : [];
 
@@ -78,7 +80,7 @@ require __DIR__ . '/includes/layout-top.php';
     <button><i class="fa-solid fa-magnifying-glass"></i></button>
   </form>
   <div style="display:flex;align-items:center;gap:12px">
-    <p class="muted" style="margin:0">Tổng: <strong><?= count($rows) ?></strong> hóa đơn</p>
+    <p class="muted" style="margin:0">Tổng: <strong><?= $pg['total'] ?></strong> hóa đơn</p>
     <a class="btn" href="?action=new"><i class="fa-solid fa-plus"></i> Tạo phiếu nhập</a>
   </div>
 </div>
@@ -105,6 +107,8 @@ require __DIR__ . '/includes/layout-top.php';
     <?php endforeach; endif; ?>
   </tbody>
 </table>
+
+<?= render_pagination($pg['page'], $pg['total_pages'], $keyword !== '' ? ['q' => $keyword] : []) ?>
 
 <?php if ($showForm):
   // Các dòng sản phẩm cần render: phiếu đang sửa dùng chi tiết cũ, phiếu mới dùng 1 dòng trống

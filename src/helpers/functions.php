@@ -140,3 +140,81 @@ function cart_total(): float {
     }
     return $total;
 }
+
+/**
+ * Read the current page number from the query string (1-based, never below 1).
+ */
+function current_page(string $param = 'page'): int {
+    return max(1, (int)($_GET[$param] ?? 1));
+}
+
+/**
+ * Slice an array of rows for the current page.
+ * Returns: items (the slice), page (clamped), per_page, total, total_pages, offset.
+ */
+function paginate(array $items, int $page, int $perPage = 10): array {
+    $perPage    = max(1, $perPage);
+    $total      = count($items);
+    $totalPages = max(1, (int)ceil($total / $perPage));
+    $page       = max(1, min($page, $totalPages));
+    $offset     = ($page - 1) * $perPage;
+    return [
+        'items'       => array_slice($items, $offset, $perPage),
+        'page'        => $page,
+        'per_page'    => $perPage,
+        'total'       => $total,
+        'total_pages' => $totalPages,
+        'offset'      => $offset,
+    ];
+}
+
+/**
+ * Render a pagination bar (inline-styled so it works on both the storefront and
+ * the admin without depending on the Tailwind/SCSS build).
+ * $params = extra query params to keep on each link (e.g. ['q' => $keyword]).
+ */
+function render_pagination(int $page, int $totalPages, array $params = [], string $accent = '#DD2D4A'): string {
+    if ($totalPages <= 1) return '';
+
+    $link = function (int $p) use ($params): string {
+        return '?' . http_build_query(array_merge($params, ['page' => $p]));
+    };
+
+    // Windowed page list: always show first & last, plus current ±2, with ellipses.
+    $window = 2;
+    $pages  = [];
+    for ($i = 1; $i <= $totalPages; $i++) {
+        if ($i === 1 || $i === $totalPages || ($i >= $page - $window && $i <= $page + $window)) {
+            $pages[] = $i;
+        } elseif (end($pages) !== '…') {
+            $pages[] = '…';
+        }
+    }
+
+    $base     = 'display:inline-flex;align-items:center;justify-content:center;min-width:38px;height:38px;padding:0 12px;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;border:1px solid #e5e7eb;background:#fff;color:#374151';
+    $active   = 'background:' . $accent . ';border-color:' . $accent . ';color:#fff;box-shadow:0 2px 8px ' . $accent . '55';
+    $disabled = 'opacity:.45;pointer-events:none';
+    $gap      = 'display:inline-flex;align-items:center;justify-content:center;min-width:38px;height:38px;color:#9ca3af;font-weight:700';
+
+    ob_start();
+    ?>
+    <nav style="display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;margin-top:24px" aria-label="Phân trang">
+      <a href="<?= e($link(max(1, $page - 1))) ?>" style="<?= $base ?>;<?= $page <= 1 ? $disabled : '' ?>" aria-label="Trang trước">
+        <i class="fa-solid fa-chevron-left" style="font-size:12px"></i>
+      </a>
+      <?php foreach ($pages as $p): ?>
+        <?php if ($p === '…'): ?>
+          <span style="<?= $gap ?>">…</span>
+        <?php elseif ($p === $page): ?>
+          <span style="<?= $base ?>;<?= $active ?>" aria-current="page"><?= $p ?></span>
+        <?php else: ?>
+          <a href="<?= e($link($p)) ?>" style="<?= $base ?>"><?= $p ?></a>
+        <?php endif; ?>
+      <?php endforeach; ?>
+      <a href="<?= e($link(min($totalPages, $page + 1))) ?>" style="<?= $base ?>;<?= $page >= $totalPages ? $disabled : '' ?>" aria-label="Trang sau">
+        <i class="fa-solid fa-chevron-right" style="font-size:12px"></i>
+      </a>
+    </nav>
+    <?php
+    return ob_get_clean();
+}

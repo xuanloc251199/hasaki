@@ -25,6 +25,12 @@ if ($keyword !== '') {
 }
 $categories = $categoryBLL->getAll();
 
+// Pagination (storefront grid: 12 per page, fits the 2/3/4-column layout)
+$totalProducts = count($products);
+$pg = paginate($products, current_page(), 12);
+$products = $pg['items'];
+$pgParams = $keyword !== '' ? ['q' => $keyword] : ($catId > 0 ? ['cat' => $catId] : []);
+
 $page_title = $headTitle . ' - ' . SITE_NAME;
 require __DIR__ . '/includes/header.php';
 ?>
@@ -117,7 +123,7 @@ require __DIR__ . '/includes/header.php';
     <!-- Toolbar -->
     <div class="flex items-center justify-between flex-wrap gap-3 mb-5 bg-white rounded-2xl px-5 py-3 border border-gray-100 shadow-sm">
       <div class="text-sm text-gray-600">
-        Tìm thấy <strong class="text-gray-900"><?= count($products) ?></strong> sản phẩm
+        Tìm thấy <strong class="text-gray-900"><?= $totalProducts ?></strong> sản phẩm
       </div>
       <div class="flex items-center gap-2">
         <span class="text-xs text-gray-500">Sắp xếp:</span>
@@ -130,7 +136,7 @@ require __DIR__ . '/includes/header.php';
       </div>
     </div>
 
-    <?php if (empty($products)): ?>
+    <?php if ($totalProducts === 0): ?>
       <div class="bg-white rounded-2xl p-16 text-center border border-gray-100">
         <div class="text-6xl text-gray-300 mb-4"><i class="fa-regular fa-face-frown"></i></div>
         <h3 class="font-bold text-xl text-gray-900 mb-2">Không tìm thấy sản phẩm phù hợp</h3>
@@ -143,6 +149,7 @@ require __DIR__ . '/includes/header.php';
       <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         <?php foreach ($products as $p): include __DIR__ . '/includes/product-card.php'; endforeach; ?>
       </div>
+      <?= render_pagination($pg['page'], $pg['total_pages'], $pgParams) ?>
     <?php endif; ?>
   </div>
 </div>
