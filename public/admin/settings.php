@@ -59,6 +59,7 @@ $groupMeta = [
   'hero'    => ['Hero trang chủ',   'fa-image',        'Tiêu đề, phụ đề, CTA, số liệu thống kê'],
   'footer'  => ['Footer',           'fa-shoe-prints',  'Giới thiệu, copyright'],
   'seo'     => ['SEO',              'fa-magnifying-glass', 'Meta tags, OG image'],
+  'kho'     => ['Kho hàng',         'fa-warehouse',    'Ngưỡng cảnh báo tồn kho, email nhận cảnh báo'],
 ];
 
 require __DIR__ . '/includes/layout-top.php';

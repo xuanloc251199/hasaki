@@ -14,6 +14,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+require_once __DIR__ . '/mail.php';
 require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/../src/helpers/functions.php';
 require_once __DIR__ . '/../src/helpers/upload.php';

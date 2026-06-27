@@ -28,6 +28,12 @@ $status_dist     = $invoiceBLL->statusDistribution();
 $status_labels   = [0 => 'Chờ xác nhận', 1 => 'Đang giao', 2 => 'Hoàn thành', 3 => 'Đã hủy'];
 $status_colors   = [0 => '#f59e0b', 1 => '#3b82f6', 2 => '#10b981', 3 => '#ef4444'];
 
+// Canh bao ton kho: san pham het / sap het hang (theo nguong cau hinh)
+$low_stock_threshold = (int)setting('low_stock_threshold', '10');
+$low_stock_products  = $productBLL->getLowStock($low_stock_threshold);
+$out_of_stock_count  = 0;
+foreach ($low_stock_products as $__lp) { if ((int)$__lp['SoLuong'] <= 0) $out_of_stock_count++; }
+
 require __DIR__ . '/includes/layout-top.php';
 ?>
 
@@ -93,6 +99,49 @@ require __DIR__ . '/includes/layout-top.php';
     </div>
   </div>
 </div>
+
+<!-- Inventory alerts -->
+<?php if (!empty($low_stock_products)): ?>
+<div class="bg-white rounded-xl shadow-card border border-amber-200 mb-6 overflow-hidden">
+  <div class="px-5 py-4 border-b border-amber-100 flex items-center justify-between bg-amber-50 flex-wrap gap-2">
+    <h2 class="text-base font-bold m-0 flex items-center gap-2 text-amber-800">
+      <i class="fa-solid fa-triangle-exclamation"></i> Cảnh báo tồn kho
+      <?php if ($out_of_stock_count > 0): ?>
+        <span class="text-xs font-bold bg-red-100 text-red-700 px-2 py-0.5 rounded-full"><?= $out_of_stock_count ?> hết hàng</span>
+      <?php endif; ?>
+      <span class="text-xs font-semibold bg-amber-200 text-amber-800 px-2 py-0.5 rounded-full"><?= count($low_stock_products) ?> cần chú ý</span>
+    </h2>
+    <a href="<?= url('admin/warehouse.php') ?>" class="text-xs text-brand-500 font-semibold hover:underline">Quản lý kho →</a>
+  </div>
+  <div class="divide-y divide-gray-100">
+    <?php foreach (array_slice($low_stock_products, 0, 6) as $lp):
+      $isOut = (int)$lp['SoLuong'] <= 0; ?>
+      <div class="flex items-center gap-3 px-5 py-3 hover:bg-gray-50 transition-colors">
+        <img src="<?= asset(e($lp['HinhAnh'])) ?>" onerror="this.src='https://placehold.co/48'"
+             class="w-10 h-10 rounded-lg object-cover border border-gray-100 shrink-0">
+        <div class="flex-1 min-w-0">
+          <div class="text-sm font-semibold text-gray-800 line-clamp-1"><?= e($lp['TenSanPham']) ?></div>
+          <div class="text-xs text-gray-500"><?= e($lp['TenDanhMuc'] ?? '') ?></div>
+        </div>
+        <?php if ($isOut): ?>
+          <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-red-100 text-red-700 shrink-0">Hết hàng</span>
+        <?php else: ?>
+          <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 shrink-0">Còn <?= (int)$lp['SoLuong'] ?></span>
+        <?php endif; ?>
+        <a href="<?= url('admin/products.php?action=edit&id=' . (int)$lp['MaSanPham']) ?>"
+           class="text-xs text-brand-500 font-semibold hover:underline whitespace-nowrap shrink-0">Nhập thêm</a>
+      </div>
+    <?php endforeach; ?>
+  </div>
+  <?php if (count($low_stock_products) > 6): ?>
+    <div class="px-5 py-3 text-center bg-gray-50">
+      <a href="<?= url('admin/warehouse.php') ?>" class="text-xs text-brand-500 font-semibold hover:underline">
+        Xem tất cả <?= count($low_stock_products) ?> sản phẩm tồn thấp →
+      </a>
+    </div>
+  <?php endif; ?>
+</div>
+<?php endif; ?>
 
 <!-- 2-column layout -->
 <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-6">

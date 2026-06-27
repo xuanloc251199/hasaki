@@ -15,6 +15,8 @@ if (!$product) {
 
 $related   = $productBLL->getRelated($id, (int)$product['MaDanhMuc']);
 $priceOld  = !empty($product['Sale']) ? (float)$product['GiaBan'] / (1 - (float)$product['Sale'] / 100) : null;
+$soldOut   = (int)($product['SoLuong'] ?? 0) <= 0;
+$lowStock  = !$soldOut && (int)$product['SoLuong'] <= (int)setting('low_stock_threshold', '10');
 $reviews   = $reviewBLL->getByProduct($id);
 $summary   = $reviewBLL->summary($id);
 $avgRating = $summary['average'];
@@ -130,9 +132,19 @@ require __DIR__ . '/includes/header.php';
           (<?= $reviewCount ?> đánh giá)
         </a>
         <span class="text-gray-300">|</span>
-        <span class="text-sm text-emerald-600 font-medium">
-          <i class="fa-solid fa-check"></i> Còn <?= (int)$product['SoLuong'] ?> sản phẩm
-        </span>
+        <?php if ($soldOut): ?>
+          <span class="text-sm text-red-600 font-semibold">
+            <i class="fa-solid fa-circle-xmark"></i> Hết hàng
+          </span>
+        <?php elseif ($lowStock): ?>
+          <span class="text-sm text-amber-600 font-semibold">
+            <i class="fa-solid fa-triangle-exclamation"></i> Sắp hết - chỉ còn <?= (int)$product['SoLuong'] ?> sản phẩm
+          </span>
+        <?php else: ?>
+          <span class="text-sm text-emerald-600 font-medium">
+            <i class="fa-solid fa-check"></i> Còn <?= (int)$product['SoLuong'] ?> sản phẩm
+          </span>
+        <?php endif; ?>
       </div>
 
       <!-- Price -->
@@ -172,6 +184,15 @@ require __DIR__ . '/includes/header.php';
       </div>
 
       <!-- Add to cart -->
+      <?php if ($soldOut): ?>
+      <div class="border-t border-gray-100 pt-6">
+        <button type="button" disabled
+                class="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gray-200 text-gray-500 font-semibold rounded-full cursor-not-allowed">
+          <i class="fa-solid fa-ban"></i> Hết hàng
+        </button>
+        <p class="text-center text-sm text-gray-500 mt-3">Sản phẩm tạm thời hết hàng. Vui lòng quay lại sau.</p>
+      </div>
+      <?php else: ?>
       <form action="<?= url('cart-action.php') ?>" method="post" class="border-t border-gray-100 pt-6">
         <input type="hidden" name="action" value="add">
         <input type="hidden" name="id" value="<?= (int)$product['MaSanPham'] ?>">
@@ -196,6 +217,7 @@ require __DIR__ . '/includes/header.php';
           </button>
         </div>
       </form>
+      <?php endif; ?>
 
       <!-- Trust badges -->
       <div class="grid grid-cols-3 gap-2 mt-6 pt-6 border-t border-gray-100">

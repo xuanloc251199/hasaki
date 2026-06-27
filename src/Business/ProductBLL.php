@@ -39,6 +39,11 @@ class ProductBLL {
         return $this->productDAL->getNewest($limit);
     }
 
+    /** San pham co ton kho <= nguong (gom ca het hang). Dung cho canh bao. */
+    public function getLowStock(int $threshold): array {
+        return $this->productDAL->getLowStock($threshold);
+    }
+
     public function getRelated(int $id, int $maDM, int $limit = 4): array {
         $list = $this->productDAL->getByCategory($maDM);
         $out  = [];

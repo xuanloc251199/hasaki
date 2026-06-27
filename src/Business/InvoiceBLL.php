@@ -2,14 +2,17 @@
 require_once __DIR__ . '/../DataAccess/InvoiceDAL.php';
 require_once __DIR__ . '/../DataAccess/ProductDAL.php';
 require_once __DIR__ . '/CartBLL.php';
+require_once __DIR__ . '/NotificationBLL.php';
 
 class InvoiceBLL {
     private InvoiceDAL $invoiceDAL;
     private ProductDAL $productDAL;
+    private NotificationBLL $notificationBLL;
 
     public function __construct() {
         $this->invoiceDAL = new InvoiceDAL();
         $this->productDAL = new ProductDAL();
+        $this->notificationBLL = new NotificationBLL();
     }
 
     public function checkout(int $maKhachHang, array $info, array $cartItems): array {
@@ -34,7 +37,12 @@ class InvoiceBLL {
         ], $cartItems);
 
         foreach ($cartItems as $it) {
-            $this->productDAL->decreaseStock((int)$it['MaSanPham'], (int)$it['SoLuong']);
+            $pid = (int)$it['MaSanPham'];
+            $this->productDAL->decreaseStock($pid, (int)$it['SoLuong']);
+
+            // Sau khi tru kho: canh bao admin neu san pham het / sap het hang.
+            $remaining = $this->productDAL->getStock($pid);
+            $this->notificationBLL->checkStockLevel($pid, (string)($it['TenSanPham'] ?? ('SP #' . $pid)), $remaining);
         }
 
         return ['success' => true, 'invoice_id' => $invoiceId];

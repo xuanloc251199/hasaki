@@ -148,4 +148,28 @@ class ProductDAL extends BaseDAL {
         $stmt = $this->db->prepare("UPDATE SanPham SET SoLuong = COALESCE(SoLuong, 0) + ? WHERE MaSanPham = ?");
         return $stmt->execute([$qty, $id]);
     }
+
+    /** So luong ton hien tai cua 1 san pham (0 neu khong ton tai). */
+    public function getStock(int $id): int {
+        $stmt = $this->db->prepare("SELECT COALESCE(SoLuong, 0) FROM SanPham WHERE MaSanPham = ?");
+        $stmt->execute([$id]);
+        return (int)$stmt->fetchColumn();
+    }
+
+    /**
+     * Cac san pham co ton kho <= nguong (gom ca het hang), sap xep tang dan
+     * theo so luong de het/sap-het hien len truoc. Dung cho widget canh bao.
+     */
+    public function getLowStock(int $threshold): array {
+        $stmt = $this->db->prepare(
+            "SELECT sp.*, dm.TenDanhMuc
+             FROM SanPham sp
+             LEFT JOIN DanhMuc dm ON sp.MaDanhMuc = dm.MaDanhMuc
+             WHERE COALESCE(sp.SoLuong, 0) <= ?
+             ORDER BY COALESCE(sp.SoLuong, 0) ASC, sp.TenSanPham ASC"
+        );
+        $stmt->bindValue(1, $threshold, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
 }

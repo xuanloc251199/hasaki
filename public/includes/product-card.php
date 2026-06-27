@@ -2,6 +2,7 @@
 // Reusable product card. Expects $p (product row) in scope.
 $detailUrl = url('product-detail.php?id=' . (int)$p['MaSanPham']);
 $priceOld = !empty($p['Sale']) ? (float)$p['GiaBan'] / (1 - (float)$p['Sale'] / 100) : null;
+$soldOut  = (int)($p['SoLuong'] ?? 0) <= 0;
 ?>
 <div class="group relative bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-transparent hover:shadow-2xl hover:shadow-brand-500/10 transition-all duration-300 flex flex-col">
 
@@ -15,9 +16,15 @@ $priceOld = !empty($p['Sale']) ? (float)$p['GiaBan'] / (1 - (float)$p['Sale'] / 
          class="relative w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
          onerror="this.style.display='none'">
 
-    <?php if (!empty($p['Sale'])): ?>
+    <?php if (!empty($p['Sale']) && !$soldOut): ?>
       <div class="absolute top-3 left-3 bg-gradient-to-br from-brand-500 to-brand-400 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
         <i class="fa-solid fa-fire text-[10px]"></i> -<?= e($p['Sale']) ?>%
+      </div>
+    <?php endif; ?>
+
+    <?php if ($soldOut): ?>
+      <div class="absolute inset-0 bg-white/55 flex items-center justify-center pointer-events-none z-10">
+        <span class="px-4 py-1.5 bg-gray-900/85 text-white text-sm font-bold rounded-full shadow-lg tracking-wide">Hết hàng</span>
       </div>
     <?php endif; ?>
 
@@ -29,6 +36,7 @@ $priceOld = !empty($p['Sale']) ? (float)$p['GiaBan'] / (1 - (float)$p['Sale'] / 
     </button>
 
     <!-- Hover quick-add overlay -->
+    <?php if (!$soldOut): ?>
     <div class="absolute inset-x-3 bottom-3 translate-y-16 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
       <form action="<?= url('cart-action.php') ?>" method="post" onsubmit="event.stopPropagation();">
         <input type="hidden" name="action" value="add">
@@ -39,6 +47,7 @@ $priceOld = !empty($p['Sale']) ? (float)$p['GiaBan'] / (1 - (float)$p['Sale'] / 
         </button>
       </form>
     </div>
+    <?php endif; ?>
   </a>
 
   <div class="p-4 flex flex-col flex-1">

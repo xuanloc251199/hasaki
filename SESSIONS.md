@@ -4,6 +4,42 @@ Lịch sử các phiên làm việc với dự án Hasaki.
 
 ---
 
+## [2026-06-27] — Gửi cảnh báo tồn kho qua email SMTP (Gmail)
+
+### Mục tiêu
+Chuyển cơ chế gửi email cảnh báo tồn kho từ hàm `mail()` của PHP (không chạy được trên localhost vì thiếu MTA) sang gửi trực tiếp qua SMTP Gmail/Google Workspace bằng App Password.
+
+### Changelog chi tiết theo task
+
+#### Task 1: Cấu hình tài khoản gửi email
+- **Mô tả:** Tách thông tin SMTP ra file config riêng để không lộ mật khẩu trong trang Cài đặt và không cần migration DB.
+- **Thay đổi:**
+  - `config/mail.php` (mới) — Các hằng: `MAIL_ENABLE`, `SMTP_HOST` (`smtp.gmail.com`), `SMTP_PORT` (`465`), `SMTP_SECURE` (`ssl`), `SMTP_USER`, `SMTP_PASS` (App Password, tự loại khoảng trắng), `SMTP_FROM_NAME`, `ADMIN_ALERT_EMAIL` (địa chỉ nhận cảnh báo mặc định).
+  - `config/config.php` — `require_once config/mail.php` (đặt trước `database.php`; SITE_NAME đã định nghĩa phía trên nên dùng được trong mail.php).
+- **Ghi chú:** Tài khoản gửi là `lethikimphung.d22ctc1@muce.edu.vn`. Gmail bắt buộc địa chỉ From khớp tài khoản xác thực.
+
+#### Task 2: SMTP client + định tuyến gửi mail
+- **Mô tả:** Viết lại mailer để gửi qua SMTP, giữ `mail()` làm dự phòng, không nem exception để không làm hỏng luồng checkout.
+- **Thay đổi:**
+  - `src/helpers/mailer.php` — Thêm `smtp_send_mail()` (SMTP thuần PHP qua `stream_socket_client`: EHLO → AUTH LOGIN → MAIL FROM → RCPT TO → DATA; hỗ trợ SSL cổng 465 và STARTTLS cổng 587; body base64 UTF-8 để không lỗi tiếng Việt) + helper `smtp_cmd()`/`smtp_expect()` (đọc phản hồi nhiều dòng). `send_html_mail()` ưu tiên SMTP khi đã cấu hình, fallback `php_mail_fallback()`. `admin_alert_recipient()` thêm fallback cuối về hằng `ADMIN_ALERT_EMAIL`.
+- **Ghi chú:** Đã test gửi thật → nhận **SENT OK**. Lỗi gửi được ghi `error_log` để debug.
+
+#### Task 3: Cập nhật ghi chú cấu hình
+- **Thay đổi:**
+  - `database/migrate_v5.sql` — Sửa GhiChu của `low_stock_email_enable` và `admin_alert_email` cho khớp (gửi qua SMTP Gmail thay vì cần MTA cho `mail()`).
+
+### Vấn đề còn tồn đọng
+- App Password để dạng plaintext trong `config/mail.php` — chấp nhận được cho đồ án; không commit lên repo công khai nếu nhạy cảm.
+- Chưa commit.
+
+### File liên quan
+- `config/mail.php`, `config/config.php`
+- `src/helpers/mailer.php`
+- `database/migrate_v5.sql`
+- `src/Business/NotificationBLL.php` (luồng gọi, không đổi)
+
+---
+
 ## [2026-06-20] — Phân trang, sửa lỗi thanh toán & cho phép đặt hàng khách vãng lai
 
 ### Mục tiêu

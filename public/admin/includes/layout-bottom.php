@@ -16,6 +16,21 @@ document.querySelectorAll('[data-confirm]').forEach(el => {
     if (!confirm(el.getAttribute('data-confirm'))) e.preventDefault();
   });
 });
+
+// Notification bell dropdown
+(function () {
+  const wrap = document.querySelector('[data-notif-wrap]');
+  if (!wrap) return;
+  const toggle = wrap.querySelector('[data-notif-toggle]');
+  const panel = wrap.querySelector('[data-notif-panel]');
+  toggle.addEventListener('click', e => {
+    e.stopPropagation();
+    panel.classList.toggle('hidden');
+  });
+  document.addEventListener('click', e => {
+    if (!wrap.contains(e.target)) panel.classList.add('hidden');
+  });
+})();
 </script>
 </body>
 </html>

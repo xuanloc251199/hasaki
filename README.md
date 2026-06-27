@@ -99,6 +99,11 @@ Schema sẽ tự tạo database `hasaki_db` với:
 - 6 danh mục, 16 sản phẩm mẫu
 - 3 tài khoản mẫu (xem ở dưới)
 
+> **Nâng cấp CSDL đã có sẵn**: nếu bạn đang chạy bản DB cũ, hãy chạy thêm migration cảnh báo tồn kho để tạo bảng `ThongBao` + nhóm cấu hình *Kho hàng*:
+> ```bash
+> mysql -uroot --default-character-set=utf8mb4 < database/migrate_v5.sql
+> ```
+
 ### 4. Chỉnh thông tin kết nối DB
 Mở `config/database.php`:
 ```php
@@ -154,7 +159,10 @@ Tất cả tài khoản dùng chung mật khẩu **`123456`** (đã hash bcrypt 
 - ✅ Quản lý đơn hàng bán (xem chi tiết, cập nhật trạng thái, xóa)
 - ✅ Quản lý đơn hàng nhập (xem, xóa)
 - ✅ Quản lý kho hàng (sửa số lượng tồn)
+- ✅ **Cảnh báo tồn kho** - widget "hết hàng / sắp hết" ở Dashboard, chuông thông báo trên thanh quản trị, gửi email cho admin khi sản phẩm chạm ngưỡng (cấu hình ngưỡng & email tại *Cài đặt → Kho hàng*)
 - ✅ Thống kê doanh thu theo ngày
+
+> **Storefront**: sản phẩm hết hàng (tồn = 0) tự hiển thị nhãn **"Hết hàng"**, vô hiệu hóa nút *Thêm vào giỏ / Mua ngay* và chặn thêm vào giỏ.
 
 ---
 
@@ -201,3 +209,9 @@ Sau đó vào:
 - http://localhost:8080/products.php
 - http://localhost:8080/login.php  (đăng nhập `khach01` / `123456`)
 - http://localhost:8080/admin/login.php  (đăng nhập `admin` / `123456`)
+
+---
+
+## 📜 Lịch sử phiên làm việc
+
+Xem [SESSIONS.md](./SESSIONS.md) để biết chi tiết các thay đổi qua từng phiên.

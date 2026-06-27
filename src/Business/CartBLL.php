@@ -20,9 +20,26 @@ class CartBLL {
         if (!$product) return ['error' => 'Sản phẩm không tồn tại'];
         if ($quantity <= 0) $quantity = 1;
 
+        // Chan mua khi het hang.
+        $stock = (int)($product['SoLuong'] ?? 0);
+        if ($stock <= 0) {
+            return ['error' => 'Sản phẩm "' . $product['TenSanPham'] . '" đã hết hàng'];
+        }
+
         $key = $productId;
+        $current = isset($_SESSION['cart'][$key]) ? (int)$_SESSION['cart'][$key]['SoLuong'] : 0;
+        $desired = $current + $quantity;
+
+        // Khong cho vuot qua so luong ton kho.
+        if ($desired > $stock) {
+            if ($current >= $stock) {
+                return ['error' => 'Chỉ còn ' . $stock . ' sản phẩm trong kho, bạn đã thêm tối đa'];
+            }
+            $desired = $stock;
+        }
+
         if (isset($_SESSION['cart'][$key])) {
-            $_SESSION['cart'][$key]['SoLuong'] += $quantity;
+            $_SESSION['cart'][$key]['SoLuong'] = $desired;
         } else {
             $_SESSION['cart'][$key] = [
                 'MaSanPham'  => (int)$product['MaSanPham'],
@@ -31,7 +48,7 @@ class CartBLL {
                 'HinhAnh'    => $product['HinhAnh'],
                 'KichCo'     => $kichCo ?? $product['KichCo'],
                 'MauSac'     => $mauSac ?? $product['MauSac'],
-                'SoLuong'    => $quantity,
+                'SoLuong'    => $desired,
             ];
         }
         return ['success' => true, 'count' => $this->count()];
