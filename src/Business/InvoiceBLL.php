@@ -36,15 +36,8 @@ class InvoiceBLL {
             'TrangThai'   => 0,
         ], $cartItems);
 
-        foreach ($cartItems as $it) {
-            $pid = (int)$it['MaSanPham'];
-            $this->productDAL->decreaseStock($pid, (int)$it['SoLuong']);
-
-            // Sau khi tru kho: canh bao admin neu san pham het / sap het hang.
-            $remaining = $this->productDAL->getStock($pid);
-            $this->notificationBLL->checkStockLevel($pid, (string)($it['TenSanPham'] ?? ('SP #' . $pid)), $remaining);
-        }
-
+        // Khong tru kho luc dat hang. Ton kho chi bi tru khi don duoc xac nhan
+        // "Hoan thanh" (xem updateStatus). Nho vay don bi huy se khong an mat kho.
         return ['success' => true, 'invoice_id' => $invoiceId];
     }
 
@@ -68,8 +61,45 @@ class InvoiceBLL {
         return $this->invoiceDAL->search($kw);
     }
 
+    /**
+     * Cap nhat trang thai don hang, dong thoi quan ly ton kho:
+     *  - Chuyen SANG "Hoan thanh" (2) lan dau  -> tru kho + canh bao ton thap.
+     *  - ROI KHOI "Hoan thanh" (vd huy lai)     -> hoan tra kho da tru.
+     * Chong tru/hoan trung bang cach so sanh trang thai cu va moi.
+     */
     public function updateStatus(int $id, int $status): bool {
-        return $this->invoiceDAL->updateStatus($id, $status);
+        $current = $this->invoiceDAL->getById($id);
+        if (!$current) return false;
+        $old = (int)$current['TrangThai'];
+
+        if ($old === $status) return true; // khong doi gi
+
+        if (!$this->invoiceDAL->updateStatus($id, $status)) return false;
+
+        if ($status === 2 && $old !== 2) {
+            $this->applyOrderStock($id, -1); // tru kho khi hoan thanh
+        } elseif ($old === 2 && $status !== 2) {
+            $this->applyOrderStock($id, +1); // hoan kho khi roi khoi hoan thanh
+        }
+        return true;
+    }
+
+    /** Tru (-1) hoac hoan (+1) kho theo cac dong cua 1 don hang. */
+    private function applyOrderStock(int $invoiceId, int $sign): void {
+        foreach ($this->invoiceDAL->getDetails($invoiceId) as $d) {
+            $pid = (int)($d['MaSanPham'] ?? 0);
+            $qty = (int)($d['SoLuong'] ?? 0);
+            if ($pid <= 0 || $qty <= 0) continue;
+
+            if ($sign < 0) {
+                $this->productDAL->decreaseStock($pid, $qty);
+                // Sau khi tru kho: canh bao admin neu san pham het / sap het hang.
+                $remaining = $this->productDAL->getStock($pid);
+                $this->notificationBLL->checkStockLevel($pid, (string)($d['TenSanPham'] ?? ('SP #' . $pid)), $remaining);
+            } else {
+                $this->productDAL->increaseStock($pid, $qty);
+            }
+        }
     }
 
     public function delete(int $id): bool {
