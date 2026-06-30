@@ -4,6 +4,34 @@ Lịch sử các phiên làm việc với dự án Hasaki.
 
 ---
 
+## [2026-06-30] — Tài liệu lý thuyết dự án & dọn thay đổi tồn đọng
+
+### Mục tiêu
+Ghi lại toàn bộ lý thuyết dự án (ngôn ngữ, frontend, backend, database, kiến trúc) thành tài liệu; commit các thay đổi code còn tồn trong working tree.
+
+### Changelog chi tiết theo task
+
+#### Task 1: Tạo tài liệu lý thuyết dự án
+- **Mô tả:** Tổng hợp nền tảng lý thuyết của dự án để phục vụ báo cáo/ôn tập, đối chiếu trực tiếp với mã nguồn (không chỉ chép từ README).
+- **Thay đổi:**
+  - `docs/LY-THUYET-DU-AN.md` (mới) — 10 phần: tổng quan, ngôn ngữ lập trình, frontend (HTML5 + SCSS + Tailwind v3 + Vanilla JS + Font Awesome), backend (PHP 8 thuần, kiến trúc 3-Layer, mẫu Singleton/DAO), database (MySQL 8 + PDO, 16 bảng), bảo mật, các luồng nghiệp vụ tiêu biểu, môi trường, tổ chức thư mục, tóm tắt stack.
+- **Ghi chú:** Thư mục `docs/` đang bị gitignore (`.gitignore` dòng 27) → **tài liệu chỉ tồn tại local, không push lên repo** (theo quyết định của người dùng). Có thể `git add -f` sau nếu muốn đưa lên.
+- **Phát hiện khi đối chiếu code:** frontend thực tế là **hybrid SCSS + Tailwind** (README chỉ ghi SCSS); có thêm module chatbot rule-based, đánh giá sản phẩm, cấu hình & menu động; logic **trừ kho khi đơn *Hoàn thành*** (không trừ lúc đặt) — đúng theo `InvoiceBLL.php`.
+
+#### Task 2: Commit các thay đổi code tồn đọng
+- **Mô tả:** 3 file đã sửa từ trước nhưng chưa commit.
+- **Thay đổi:**
+  - `src/helpers/functions.php` — định dạng lại theo PSR-12 (đưa `{` xuống dòng, chuẩn hoá thụt lề); **không đổi logic**.
+  - `public/products.php` — phân trang storefront **12 → 15 sản phẩm/trang**.
+  - `public/assets/css/tailwind.css` — build lại CSS.
+- **Ghi chú:** Commit `5bed389`, đã push lên `origin/master`.
+
+### File liên quan
+- `docs/LY-THUYET-DU-AN.md` (local-only)
+- `src/helpers/functions.php`, `public/products.php`, `public/assets/css/tailwind.css`
+
+---
+
 ## [2026-06-27] — Gửi cảnh báo tồn kho qua email SMTP (Gmail)
 
 ### Mục tiêu
