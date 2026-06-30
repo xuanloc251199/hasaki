@@ -27,7 +27,7 @@ $categories = $categoryBLL->getAll();
 
 // Pagination (storefront grid: 12 per page, fits the 2/3/4-column layout)
 $totalProducts = count($products);
-$pg = paginate($products, current_page(), 12);
+$pg = paginate($products, current_page(), 15);
 $products = $pg['items'];
 $pgParams = $keyword !== '' ? ['q' => $keyword] : ($catId > 0 ? ['cat' => $catId] : []);
 
