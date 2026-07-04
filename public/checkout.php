@@ -18,6 +18,9 @@ $isGuest  = !is_logged_in();
 $customer = $isGuest ? null : $customerBLL->getByAccount((int)$_SESSION['user_id']);
 $err = null;
 
+// Bank QR transfer is only offered when admin has enabled it and uploaded a QR
+$bankEnabled = bank_transfer_enabled();
+
 // Guests can order (a customer profile is created from the form below). But a
 // logged-in admin/staff account has no customer profile and no valid
 // MaKhachHang, so it is still blocked instead of crashing on the FK constraint.
@@ -28,18 +31,24 @@ if (!$isGuest && !$customer) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $invoiceBLL = new InvoiceBLL();
+
+  // Whitelist the payment method (reject BANK if the shop disabled QR transfer).
+  $allowedPayments = ['COD', 'VNPAY', 'MOMO'];
+  if ($bankEnabled) $allowedPayments[] = 'BANK';
+  $payment = in_array($_POST['payment'] ?? '', $allowedPayments, true) ? $_POST['payment'] : 'COD';
+
   $info = [
     'SDT'        => trim($_POST['sdt'] ?? ''),
     'Email'      => trim($_POST['email'] ?? ''),
     'DiaChiGH'   => trim($_POST['address'] ?? ''),
     'GhiChu'     => trim($_POST['note'] ?? ''),
-    'HinhThucTT' => $_POST['payment'] ?? 'COD',
+    'HinhThucTT' => $payment,
   ];
 
   // Resolve the customer id: existing profile for members, or a freshly created
   // guest profile (MaTaiKhoan = NULL) built from the checkout form.
   $maKhachHang = 0;
-  if ($isGuest) {
+  if (!$err && $isGuest) {
     $fullname = trim($_POST['fullname'] ?? '');
     if ($fullname === '')             $err = 'Vui lòng nhập họ và tên';
     elseif ($info['SDT'] === '')      $err = 'Vui lòng nhập số điện thoại';
@@ -55,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       ]);
       isset($created['error']) ? ($err = $created['error']) : ($maKhachHang = (int)$created['id']);
     }
-  } else {
+  } elseif (!$isGuest) {
     $maKhachHang = (int)$customer['MaKhachHang'];
   }
 
@@ -66,6 +75,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
       if ($isGuest) $_SESSION['guest_orders'][] = (int)$res['invoice_id'];
       $cart->clear();
+      // Bank QR: send the customer to the QR page to pay & confirm; other
+      // methods go straight to the success page.
+      if ($payment === 'BANK') {
+        redirect(url('bank-payment.php?id=' . $res['invoice_id']));
+      }
       set_flash_success('Đặt hàng thành công! Mã đơn hàng: #' . $res['invoice_id']);
       redirect(url('order-success.php?id=' . $res['invoice_id']));
     }
@@ -197,6 +211,24 @@ require __DIR__ . '/includes/header.php';
               <div class="text-xs text-gray-500">Thanh toán nhanh chóng qua ví MoMo</div>
             </div>
           </label>
+          <?php if ($bankEnabled): ?>
+          <label class="flex items-center gap-3 p-4 rounded-xl border-2 border-gray-200 cursor-pointer hover:border-brand-300 payment-option">
+            <input type="radio" name="payment" value="BANK" class="w-5 h-5 accent-brand-500">
+            <div class="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center text-teal-600 text-xl shrink-0">
+              <i class="fa-solid fa-qrcode"></i>
+            </div>
+            <div class="flex-1">
+              <div class="font-semibold">Chuyển khoản ngân hàng (quét mã QR)</div>
+              <div class="text-xs text-gray-500">Quét mã QR bằng app ngân hàng, chuyển khoản rồi xác nhận</div>
+            </div>
+          </label>
+
+          <!-- Hint shown when BANK is selected: QR appears on the next step -->
+          <div id="bank-qr-panel" class="hidden mt-3 p-4 rounded-xl border-2 border-dashed border-teal-300 bg-teal-50/50 text-sm text-gray-600 flex items-center gap-2">
+            <i class="fa-solid fa-circle-info text-teal-600"></i>
+            <span>Sau khi bấm <strong>Đặt hàng ngay</strong>, hệ thống sẽ hiển thị <strong>mã QR</strong> để bạn quét và chuyển khoản, rồi bấm xác nhận.</span>
+          </div>
+          <?php endif; ?>
         </div>
       </div>
     </div>
@@ -264,11 +296,13 @@ require __DIR__ . '/includes/header.php';
 // Reflect the checked payment radio as the highlighted option (only one at a time)
 (function () {
   var options = document.querySelectorAll('.payment-option');
+  var qrPanel = document.getElementById('bank-qr-panel');
   function sync() {
     var checked = document.querySelector('input[name="payment"]:checked');
     options.forEach(function (o) {
       o.classList.toggle('active', !!checked && o.contains(checked));
     });
+    if (qrPanel) qrPanel.classList.toggle('hidden', !checked || checked.value !== 'BANK');
   }
   document.querySelectorAll('input[name="payment"]').forEach(function (r) {
     r.addEventListener('change', sync);

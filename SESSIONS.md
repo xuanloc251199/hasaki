@@ -4,6 +4,41 @@ Lịch sử các phiên làm việc với dự án Hasaki.
 
 ---
 
+## [2026-07-04] — Thanh toán chuyển khoản ngân hàng bằng mã QR
+
+### Mục tiêu
+Thêm hình thức thanh toán chuyển khoản ngân hàng quét mã QR: chỉ dùng **ảnh QR tĩnh** (admin tự upload), **không tích hợp API cổng thanh toán thật**. Ảnh QR + thông tin ngân hàng quản lý được trong admin; đơn theo luồng 2 bước (đặt hàng → trang QR → xác nhận đã chuyển khoản → chờ shop kiểm tra).
+
+### Changelog chi tiết theo task
+
+#### Task 1: Cấu hình thanh toán quản lý trong admin (Settings)
+- **Mô tả:** Thay vì hằng số cứng, đưa toàn bộ thông tin ngân hàng + ảnh QR vào bảng `CauHinh` (nhóm mới `thanhtoan`), sửa được ngay trong **Admin → Cài đặt → tab "Thanh toán"** (tận dụng cơ chế upload ảnh sẵn có).
+- **Thay đổi:**
+  - `database/migrate_v6.sql` (mới) — thêm 6 khoá: `bank_transfer_enable` (boolean), `bank_qr_image` (image/upload), `bank_name`, `bank_account_no`, `bank_account_name`, `bank_transfer_note` (tiền tố nội dung CK). Dùng `ON DUPLICATE KEY UPDATE` nên chạy lại an toàn.
+  - `public/admin/settings.php` — thêm `groupMeta['thanhtoan']` để hiện tab "Thanh toán" (icon `fa-qrcode`).
+  - `src/helpers/functions.php` — `bank_transfer_enabled()` (bật khi admin bật **và** đã upload ảnh QR), `payment_method_label()` (nhãn tiếng Việt cho mã `HinhThucTT`). Gỡ helper `vietqr_image_url()` (bản thử đầu tiên dùng img.vietqr.io — đã bỏ theo yêu cầu chỉ dùng ảnh tĩnh).
+  - `config/config.php` — không thêm hằng ngân hàng (đã chuyển hết sang Settings).
+- **Ghi chú:** Chạy migration 1 lần: `mysql -uroot --default-character-set=utf8mb4 < database/migrate_v6.sql`. Mặc định `bank_qr_image` rỗng → phương thức QR **ẩn** cho tới khi admin upload ảnh.
+
+#### Task 2: Luồng thanh toán QR 2 bước + bắt buộc xác nhận
+- **Mô tả:** Luồng: chọn "Chuyển khoản QR" → **Đặt hàng ngay** (tạo đơn, trạng thái *Chờ xác nhận*) → tự chuyển sang trang QR → khách chuyển khoản rồi bấm **"Tôi đã chuyển khoản"** → màn hình **"Đã ghi nhận, đang chờ kiểm tra"**. Không có cổng thật: xác nhận là khách tự cam kết, admin đối chiếu thủ công.
+- **Thay đổi:**
+  - `public/bank-payment.php` (mới) — trang QR: kiểm soát truy cập như order-success (thành viên xem đơn của mình; khách vãng lai chỉ xem đơn vừa đặt trong session). Hiện ảnh QR + STK/chủ TK + số tiền + nội dung CK `HASAKI DH{mã đơn}` + nút xác nhận. POST `action=confirm` → ghi dấu vào đơn rồi hiện màn hình chờ kiểm tra. Không phải đơn BANK → redirect về order-success.
+  - `public/checkout.php` — whitelist `payment` (chỉ nhận `BANK` khi bật); bỏ ô tick + QR inline của bản trước, thay bằng dòng nhắc; BANK → sau khi tạo đơn thì `redirect(bank-payment.php?id=...)` thay vì order-success; sửa nhánh tạo hồ sơ khách để **không tạo bản ghi khách rác** khi có lỗi.
+  - `src/Business/InvoiceBLL.php` — `confirmBankTransfer()` (idempotent: append `[Khách đã xác nhận chuyển khoản lúc dd/mm/YYYY HH:MM]` vào `GhiChu`, không ghi trùng), `isBankConfirmed()`, hằng `BANK_CONFIRM_MARK`. Đơn giữ trạng thái *Chờ xác nhận* (0).
+  - `src/DataAccess/InvoiceDAL.php` — `updateNote()`.
+  - `public/order-success.php` — dùng ảnh QR + thông tin từ Settings + `payment_method_label()`; câu chữ khối chuyển khoản để trung tính (trang chi tiết, không phải nơi xác nhận).
+  - `public/assets/css/tailwind.css` — build lại (thêm class teal/w-52/border-dashed…).
+- **Ghi chú:** Đã kiểm thử E2E với DB thật (đặt đơn → trang QR → xác nhận → ghi chú lưu đúng UTF-8; bấm lại không ghi trùng; tắt chức năng thì server từ chối `payment=BANK`, tự về COD) rồi **xóa sạch dữ liệu test**. Admin đối chiếu dấu xác nhận trong ghi chú đơn rồi tự cập nhật trạng thái sang *Hoàn thành* khi nhận đủ tiền.
+
+### File liên quan
+- `database/migrate_v6.sql`, `public/bank-payment.php` (mới)
+- `public/checkout.php`, `public/order-success.php`, `public/admin/settings.php`
+- `src/Business/InvoiceBLL.php`, `src/DataAccess/InvoiceDAL.php`, `src/helpers/functions.php`
+- `public/assets/css/tailwind.css`
+
+---
+
 ## [2026-06-30] — Tài liệu lý thuyết dự án & dọn thay đổi tồn đọng
 
 ### Mục tiêu

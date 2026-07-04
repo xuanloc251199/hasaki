@@ -106,6 +106,11 @@ class InvoiceDAL extends BaseDAL {
         return $stmt->execute([$status, $id]);
     }
 
+    public function updateNote(int $id, ?string $note): bool {
+        $stmt = $this->db->prepare("UPDATE HoaDonBan SET GhiChu = ? WHERE MaHoaDon = ?");
+        return $stmt->execute([$note, $id]);
+    }
+
     public function delete(int $id): bool {
         $stmt = $this->db->prepare("DELETE FROM HoaDonBan WHERE MaHoaDon = ?");
         return $stmt->execute([$id]);

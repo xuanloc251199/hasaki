@@ -144,6 +144,31 @@ function menu(string $position): array
     return $bll->getByPosition($position);
 }
 
+/**
+ * Bank-transfer QR payment is available only when enabled in admin settings
+ * AND a QR image has been uploaded (there is no real gateway — the customer
+ * scans the image and transfers manually).
+ */
+function bank_transfer_enabled(): bool
+{
+    return setting('bank_transfer_enable', '1') === '1'
+        && trim((string)setting('bank_qr_image', '')) !== '';
+}
+
+/**
+ * Human-readable label for a payment method code stored in HinhThucTT.
+ */
+function payment_method_label(?string $code): string
+{
+    return match ($code) {
+        'COD'   => 'Thanh toán khi nhận hàng (COD)',
+        'VNPAY' => 'Thẻ ATM / Internet Banking / VNPay',
+        'MOMO'  => 'Ví điện tử MoMo',
+        'BANK'  => 'Chuyển khoản ngân hàng (quét mã QR)',
+        default => (string)$code,
+    };
+}
+
 function cart_count(): int
 {
     if (empty($_SESSION['cart'])) return 0;

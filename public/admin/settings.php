@@ -60,6 +60,7 @@ $groupMeta = [
   'footer'  => ['Footer',           'fa-shoe-prints',  'Giới thiệu, copyright'],
   'seo'     => ['SEO',              'fa-magnifying-glass', 'Meta tags, OG image'],
   'kho'     => ['Kho hàng',         'fa-warehouse',    'Ngưỡng cảnh báo tồn kho, email nhận cảnh báo'],
+  'thanhtoan' => ['Thanh toán',     'fa-qrcode',       'Mã QR chuyển khoản & thông tin ngân hàng'],
 ];
 
 require __DIR__ . '/includes/layout-top.php';

@@ -106,6 +106,30 @@ class InvoiceBLL {
         return $this->invoiceDAL->delete($id);
     }
 
+    /** Marker appended to GhiChu when a customer confirms a bank transfer. */
+    public const BANK_CONFIRM_MARK = '[Khách đã xác nhận chuyển khoản';
+
+    public function isBankConfirmed(array $invoice): bool {
+        return str_contains($invoice['GhiChu'] ?? '', self::BANK_CONFIRM_MARK);
+    }
+
+    /**
+     * Customer clicked "Đã chuyển khoản" on the QR page. There is no real
+     * gateway — this just records the claim on the order (idempotent) so the
+     * shop can reconcile it manually. Order stays "Chờ xác nhận" (status 0).
+     */
+    public function confirmBankTransfer(int $id): array {
+        $invoice = $this->invoiceDAL->getById($id);
+        if (!$invoice) return ['error' => 'Không tìm thấy đơn hàng'];
+        if (($invoice['HinhThucTT'] ?? '') !== 'BANK') return ['error' => 'Đơn hàng không thanh toán bằng chuyển khoản'];
+        if ($this->isBankConfirmed($invoice)) return ['success' => true, 'already' => true];
+
+        $stamp = self::BANK_CONFIRM_MARK . ' lúc ' . date('d/m/Y H:i') . ']';
+        $note  = trim(($invoice['GhiChu'] ?? '') . "\n" . $stamp);
+        $this->invoiceDAL->updateNote($id, $note);
+        return ['success' => true];
+    }
+
     public function statusLabel(int $status): string {
         return match ($status) {
             0 => 'Chờ xác nhận',
